@@ -14,6 +14,9 @@ Flickable {
 
   required property var workspace
   property var monitors: []
+  property real monitorAspect: 16 / 9
+  property real barReservePct: 0
+  property string home: ""
   property color foreground: Color.menu.text
   property bool advancedOpen: false
   // Bumped by the Studio when an app is added or removed, so the Repeater's
@@ -26,6 +29,9 @@ Flickable {
   signal addAppRequested()
   signal removeAppRequested(int index)
   signal grabRequested(int index)
+  signal pickRequested(int index)
+  signal layoutChanged()
+  signal layoutStructureChanged()
 
   contentWidth: width
   contentHeight: body.implicitHeight
@@ -319,6 +325,24 @@ Flickable {
 
     PanelSeparator { width: root.width; foreground: root.foreground }
 
+    // ------------------------------------------------------------ layout
+
+    LayoutCanvas {
+      width: root.width
+      workspace: root.workspace
+      foreground: root.foreground
+      monitorAspect: root.monitorAspect
+      barReservePct: root.barReservePct
+      home: root.home
+      appsRevision: root.appsRevision
+
+      onChanged: root.layoutChanged()
+      onStructureChanged: root.layoutStructureChanged()
+      onAddAppRequested: root.pickRequested(-1)
+    }
+
+    PanelSeparator { width: root.width; foreground: root.foreground }
+
     // -------------------------------------------------------------- apps
 
     Row {
@@ -362,6 +386,7 @@ Flickable {
         onChanged: root.changed()
         onRemoveRequested: root.removeAppRequested(index)
         onGrabRequested: root.grabRequested(index)
+        onPickRequested: root.pickRequested(index)
       }
     }
 
@@ -370,7 +395,17 @@ Flickable {
 
       Button {
         text: "Add app"
+        iconText: "󰀻"
+        tooltipText: "Pick an installed application"
+        foreground: root.foreground
+        bordered: true
+        onClicked: root.pickRequested(-1)
+      }
+
+      Button {
+        text: "Add a blank row"
         iconText: "󰐕"
+        tooltipText: "Add an empty app row to fill in by hand"
         foreground: root.foreground
         bordered: true
         onClicked: root.addAppRequested()

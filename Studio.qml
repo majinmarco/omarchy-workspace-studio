@@ -11,6 +11,7 @@ import "components"
 import "Config.js" as Config
 import "HyprGen.js" as HyprGen
 import "Import.js" as Importer
+import "Layout.js" as Layout
 
 // Workspace Studio — the editor.
 //
@@ -57,6 +58,10 @@ Item {
   property var validation: ({ ok: true, errors: [], warnings: [] })
 
   property var monitors: []
+  // Aspect and reserved-strip fraction of the first monitor, so the layout
+  // canvas is the shape of the screen rather than a generic 16:9 box.
+  property real monitorAspect: 16 / 9
+  property real barReservePct: 0
   property var icons: []
   property var barSettings: ({})
   property string diskLua: ""
@@ -75,7 +80,8 @@ Item {
   readonly property color scrim: Color.menu.scrim
   readonly property var borderSpec: Border.surfaceSpec("menu", "border", Color.menu.border, Math.max(1, Style.space(2)))
 
-  readonly property bool anyModalOpen: iconPicker.opened || preview.opened || wizard.opened || confirmDelete.opened
+  readonly property bool anyModalOpen: iconPicker.opened || preview.opened || wizard.opened
+    || confirmDelete.opened || appPicker.opened
   readonly property var workspaces: config && config.workspaces ? config.workspaces : []
   readonly property var selectedWorkspace: selectedIndex >= 0 && selectedIndex < workspaces.length
     ? workspaces[selectedIndex]
@@ -183,6 +189,11 @@ Item {
     var bits = []
     if (workspace.monitor) bits.push(workspace.monitor)
     if (workspace.layout) bits.push(workspace.layout)
+    if (workspace.arrangement && workspace.arrangement.mode !== "none") {
+      var preset = Layout.detectPreset(workspace.arrangement.root)
+      var shape = preset ? Layout.presetLabel(preset) : "custom"
+      bits.push(workspace.arrangement.mode === "float" ? shape + " (exact)" : shape)
+    }
     if (workspace.persistent) bits.push("persistent")
     if (workspace["default"]) bits.push("default")
     var apps = []
@@ -248,8 +259,15 @@ Item {
     root.touched()
   }
 
+  // Layout leaves address apps by array index, so removing an app from under
+  // the tree would silently re-point every leaf after it. Re-index first, then
+  // splice; Config.normalize would only clamp the now-out-of-range tail.
   function removeApp(index) {
     if (!root.selectedWorkspace) return
+    var arrangement = root.selectedWorkspace.arrangement
+    if (arrangement && arrangement.root) {
+      arrangement.root = Layout.reindexAfterAppRemoval(arrangement.root, index)
+    }
     root.selectedWorkspace.apps.splice(index, 1)
     root.appsRevision++
     root.touched()
@@ -295,6 +313,50 @@ Item {
     root.appsRevision++
     root.touched()
     root.setStatus("Grabbed " + source + ".", false)
+  }
+
+  // Picking an app is the same shape as grabbing a window: -1 means "into a
+  // new row", anything else re-points an existing one.
+  property int pickTargetIndex: -1
+  function pickApp(index) {
+    if (!root.selectedWorkspace) return
+    root.pickTargetIndex = index
+    appPicker.open()
+  }
+
+  function applyPick(entry) {
+    if (!root.selectedWorkspace || !entry || !entry.id) return
+
+    var existing = root.pickTargetIndex >= 0 && root.pickTargetIndex < root.selectedWorkspace.apps.length
+    var app = existing ? root.selectedWorkspace.apps[root.pickTargetIndex] : Config.defaultApp()
+
+    app.desktop = {
+      id: String(entry.id),
+      name: String(entry.name || ""),
+      icon: String(entry.icon || ""),
+      classSource: String(entry.classSource || "")
+    }
+
+    // Never overwrite a class the user typed or grabbed themselves. The only
+    // classes this replaces are ones a previous pick derived.
+    var current = app.match.class || app.match.initialClass
+    var wasDerived = existing && app.desktop && app.desktop.classSource !== "manual"
+    if (!current || wasDerived) {
+      app.match.class = String(entry["class"] || "")
+      app.match.initialClass = ""
+    } else {
+      app.desktop.classSource = "manual"
+    }
+
+    if (!app.label) app.label = String(entry.name || entry.id)
+
+    if (!existing) {
+      root.selectedWorkspace.apps.push(app)
+      // A new row is a new leaf target, so the app list has to rebuild.
+      root.appsRevision++
+    }
+    root.touched()
+    root.setStatus("Picked " + (entry.name || entry.id) + ".", false)
   }
 
   function setIcon(glyph, iconName) {
@@ -582,6 +644,16 @@ Item {
         var names = []
         for (var i = 0; i < list.length; i++) if (list[i].name) names.push(list[i].name)
         root.monitors = names
+        if (list.length > 0) {
+          var first = list[0]
+          var scale = Number(first.scale) || 1
+          var logicalW = (Number(first.width) || 1920) / scale
+          var logicalH = (Number(first.height) || 1080) / scale
+          if (logicalW > 0 && logicalH > 0) root.monitorAspect = logicalW / logicalH
+          // reserved is [left, top, right, bottom] in logical pixels.
+          var reserved = first.reserved && first.reserved.length > 1 ? Number(first.reserved[1]) || 0 : 0
+          root.barReservePct = logicalH > 0 ? Math.round(reserved / logicalH * 10000) / 100 : 0
+        }
       } catch (error) {
         root.monitors = []
       }
@@ -699,6 +771,7 @@ Item {
           else if (text === "e") root.addApp()
           else if (text === "i" && root.selectedWorkspace) iconPicker.open(root.selectedWorkspace.icon, root.selectedWorkspace.iconName)
           else if (text === "g") root.grabWindow(-1)
+          else if (text === "f") root.pickApp(-1)
           else if (text === "p") root.openPreview()
           else if (text === "u") root.revert()
           else if (text === "J" && root.selectedWorkspace) root.moveWorkspace(root.selectedWorkspace.id, 1)
@@ -916,6 +989,9 @@ Item {
                   visible: root.selectedWorkspace !== null
                   workspace: root.selectedWorkspace || Config.defaultWorkspace(1)
                   monitors: root.monitors
+                  monitorAspect: root.monitorAspect
+                  barReservePct: root.barReservePct
+                  home: root.home
                   foreground: root.foreground
                   appsRevision: root.appsRevision
 
@@ -926,6 +1002,11 @@ Item {
                   onAddAppRequested: root.addApp()
                   onRemoveAppRequested: function (index) { root.removeApp(index) }
                   onGrabRequested: function (index) { root.grabWindow(index) }
+                  onPickRequested: function (index) { root.pickApp(index) }
+                  onLayoutChanged: root.touched()
+                  // A leaf appeared or vanished, so the app rows have to
+                  // rebuild. A splitter drag never reaches this.
+                  onLayoutStructureChanged: root.appsRevision++
                 }
 
                 Text {
@@ -1089,7 +1170,7 @@ Item {
                     textFormat: Text.PlainText
                     wrapMode: Text.WordWrap
                     text: "j / k  move        J / K  reorder        a  add workspace        x  remove\n"
-                      + "e  add app         i  pick icon           g  grab focused window\n"
+                      + "e  add app         f  find an app          i  pick icon           g  grab focused window\n"
                       + "p  preview         u  revert              ctrl+enter  apply        tab  switch tab        esc  close"
                     color: root.foreground
                     opacity: 0.6
@@ -1215,6 +1296,23 @@ Item {
         onDismissed: Qt.callLater(function () { keyCatcher.forceActiveFocus() })
       }
 
+      AppPicker {
+        id: appPicker
+        anchors.fill: parent
+        omarchyPath: root.omarchyPath
+        foreground: root.foreground
+        background: root.background
+        onPicked: function (entry) { root.applyPick(entry) }
+        onManualRequested: {
+          // The escape hatch: make sure there is a row to type into, then say
+          // where the cursor should go.
+          if (root.pickTargetIndex < 0) root.addApp()
+          root.setStatus("Type the command in the app's command field; a typed command always wins.", false)
+          Qt.callLater(function () { keyCatcher.forceActiveFocus() })
+        }
+        onDismissed: Qt.callLater(function () { keyCatcher.forceActiveFocus() })
+      }
+
       PreviewPane {
         id: preview
         anchors.fill: parent
@@ -1242,6 +1340,10 @@ Item {
     // QML gives each .js resource its own scope, so the importer has to be
     // handed the config module explicitly.
     Importer.useConfig(Config)
+    // Same reason: the layout maths lives in Layout.js and both the config
+    // model and the generator have to be handed it explicitly.
+    Config.useLayout(Layout)
+    HyprGen.useLayoutModule(Layout)
     root.rebuildRows()
   }
 }
