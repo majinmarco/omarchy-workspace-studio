@@ -22,6 +22,14 @@ var RELOAD_MODES = ["config-only", "full", "eval-only"];
 var COLORS = ["default", "accent", "urgent"];
 var MATCH_KEYS = ["class", "title", "initialClass", "initialTitle"];
 
+// How validate() names a match field in a sentence.
+var MATCH_LABELS = {
+  "class": "class",
+  "title": "title",
+  "initialClass": "initial class",
+  "initialTitle": "initial title"
+};
+
 // Which rule in deriveClass() produced app.match.class. Stored so the editor
 // can show how much to trust it, and so a class the user edited by hand is
 // never silently overwritten by a later pick.
@@ -559,6 +567,91 @@ function shellQuoteSingle(value) {
   return "'" + String(value === undefined || value === null ? "" : value).replace(/'/g, "'\\''") + "'";
 }
 
+// How a row is named in a message: its label, then whatever the picked desktop
+// entry knows, then its position — the same fallback ladder the rest of
+// validate() uses, spelled once because the conflict messages name two rows.
+function appDescription(app, index) {
+  if (app && app.label) return String(app.label);
+  if (app && isObject(app.desktop) && (app.desktop.name || app.desktop.id)) {
+    return String(app.desktop.name || app.desktop.id);
+  }
+  return "app " + (index + 1);
+}
+
+// Hyprland matches window-rule regexes against the whole property, so `chromium`
+// and `^chromium$` select exactly the same windows. Strip one leading `^` and
+// one trailing `$` (unless it is escaped, and so a literal dollar) to compare
+// the two spellings. Only exact equality after this: patterns that merely
+// overlap — `(a|b)` against `a` — are deliberately out of scope.
+function canonicalMatch(value) {
+  var pattern = value === undefined || value === null ? "" : String(value);
+  if (pattern.charAt(0) === "^") pattern = pattern.substring(1);
+  var last = pattern.length - 1;
+  if (last >= 0 && pattern.charAt(last) === "$" && pattern.charAt(last - 1) !== "\\") {
+    pattern = pattern.substring(0, last);
+  }
+  return pattern;
+}
+
+// Two rows on different workspaces that match the same window property are a
+// silent trap: Hyprland applies one workspace rule to a matching window and the
+// other row never sees it, with no error anywhere. Within a single workspace the
+// same match twice is legitimate — two windows of the same app — so only pairs
+// that straddle workspaces warn. Fields are compared like for like: a class is
+// never compared against a title.
+function matchConflictWarnings(config) {
+  var out = [];
+  var groups = {};
+  var i, a, k, key, bucket;
+
+  for (i = 0; i < config.workspaces.length; i++) {
+    for (a = 0; a < config.workspaces[i].apps.length; a++) {
+      var match = config.workspaces[i].apps[a].match;
+      if (!isObject(match)) continue;
+      for (k = 0; k < MATCH_KEYS.length; k++) {
+        key = MATCH_KEYS[k];
+        var canonical = canonicalMatch(match[key]);
+        if (!canonical) continue;
+        // Keyed by field and pattern together, so a class never groups with a
+        // title. The space also keeps the key from colliding with an
+        // Object.prototype name like "constructor".
+        bucket = key + " " + canonical;
+        if (!groups[bucket]) groups[bucket] = [];
+        groups[bucket].push({ wsIndex: i, appIndex: a });
+      }
+    }
+  }
+
+  for (i = 0; i < config.workspaces.length; i++) {
+    var ws = config.workspaces[i];
+    for (a = 0; a < ws.apps.length; a++) {
+      var app = ws.apps[a];
+      if (!isObject(app.match)) continue;
+      for (k = 0; k < MATCH_KEYS.length; k++) {
+        key = MATCH_KEYS[k];
+        var mine = canonicalMatch(app.match[key]);
+        if (!mine) continue;
+        bucket = key + " " + mine;
+        var rows = groups[bucket];
+        var other = null;
+        for (var r = 0; rows && r < rows.length && !other; r++) {
+          if (config.workspaces[rows[r].wsIndex].id !== ws.id) other = rows[r];
+        }
+        if (!other) continue;
+        var otherWs = config.workspaces[other.wsIndex];
+        out.push({
+          path: "workspaces[" + i + "].apps[" + a + "].match." + key,
+          message: "The " + MATCH_LABELS[key] + " match for " + appDescription(app, a) +
+            " is the same as " + appDescription(otherWs.apps[other.appIndex], other.appIndex) +
+            " on workspace " + otherWs.id + ", so Hyprland sends every matching window to only one of them."
+        });
+      }
+    }
+  }
+
+  return out;
+}
+
 // Returns { ok, errors[], warnings[] }. Errors block Apply; warnings do not.
 function validate(raw) {
   var errors = [];
@@ -683,6 +776,9 @@ function validate(raw) {
       });
     }
   }
+
+  var conflicts = matchConflictWarnings(config);
+  for (var c = 0; c < conflicts.length; c++) warnings.push(conflicts[c]);
 
   if (config.binds.enabled && !config.binds.focusMods) {
     errors.push({ path: "binds.focusMods", message: "Focus modifiers cannot be empty." });

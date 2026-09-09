@@ -207,6 +207,86 @@ test('more than one onCreatedEmpty app on a workspace warns about chaining', () 
   assert.ok(result.warnings.some(w => /chained into one command/.test(w.message)));
 });
 
+test('the same class on two workspaces warns on both rows', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ label: 'Browser', match: { class: 'chromium' } }] },
+      { id: 6, apps: [{ label: 'Chat', match: { class: 'chromium' } }] }
+    ]
+  });
+  assert.equal(result.ok, true);
+  const conflicts = plain(result.warnings.filter(w => /sends every matching window/.test(w.message)));
+  assert.equal(conflicts.length, 2);
+  assert.equal(conflicts[0].path, 'workspaces[0].apps[0].match.class');
+  assert.match(conflicts[0].message, /class match for Browser is the same as Chat on workspace 6/);
+  assert.equal(conflicts[1].path, 'workspaces[1].apps[0].match.class');
+  assert.match(conflicts[1].message, /class match for Chat is the same as Browser on workspace 1/);
+});
+
+test('an anchored pattern conflicts with the same bare one', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ label: 'Browser', match: { class: 'chromium' } }] },
+      { id: 6, apps: [{ label: 'Chat', match: { class: '^chromium$' } }] }
+    ]
+  });
+  assert.equal(result.warnings.filter(w => /sends every matching window/.test(w.message)).length, 2);
+});
+
+test('an escaped dollar is a literal, not an anchor', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ match: { class: 'money' } }] },
+      { id: 6, apps: [{ match: { class: 'money\\$' } }] }
+    ]
+  });
+  assert.equal(result.warnings.filter(w => /sends every matching window/.test(w.message)).length, 0);
+});
+
+test('the same class twice on one workspace is legitimate', () => {
+  const result = S.validate({
+    workspaces: [{
+      id: 1,
+      apps: [{ match: { class: 'foot' } }, { match: { class: '^foot$' } }]
+    }]
+  });
+  assert.equal(result.warnings.filter(w => /sends every matching window/.test(w.message)).length, 0);
+});
+
+test('a class is never compared against an initialClass', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ match: { class: 'chromium' } }] },
+      { id: 6, apps: [{ match: { initialClass: 'chromium' } }] }
+    ]
+  });
+  assert.equal(result.warnings.filter(w => /sends every matching window/.test(w.message)).length, 0);
+});
+
+test('empty matches never conflict with each other', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ match: { class: '' }, launch: { mode: 'autostart', command: 'a' } }] },
+      { id: 6, apps: [{ launch: { mode: 'autostart', command: 'b' } }] },
+      { id: 7, apps: [{ match: { class: '^' }, launch: { mode: 'autostart', command: 'c' } }] }
+    ]
+  });
+  assert.equal(result.warnings.filter(w => /sends every matching window/.test(w.message)).length, 0);
+});
+
+test('an unlabelled conflicting row is named by its position', () => {
+  const result = S.validate({
+    workspaces: [
+      { id: 1, apps: [{ match: { title: 'notes' } }] },
+      { id: 2, apps: [{ match: { class: 'x' } }, { match: { title: '^notes' } }] }
+    ]
+  });
+  const conflicts = plain(result.warnings.filter(w => /sends every matching window/.test(w.message)));
+  assert.equal(conflicts.length, 2);
+  assert.match(conflicts[0].message, /The title match for app 1 is the same as app 2 on workspace 2/);
+  assert.equal(conflicts[1].path, 'workspaces[1].apps[1].match.title');
+});
+
 test('going past ten workspaces warns about the non-digit keys', () => {
   const many = [];
   for (let i = 1; i <= 11; i++) many.push({ id: i });

@@ -4,6 +4,27 @@ All notable changes to Workspace Studio are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-09-09
+
+### Added
+
+- **A warning when two apps on different workspaces match the same window.**
+  Hyprland applies one workspace rule to a matching window, so a `chromium` on
+  workspace 1 and a `^chromium$` on workspace 6 do not split the browser between
+  them — every window lands on one of the two, and nothing anywhere said so.
+  `validate()` now raises a warning on each of the two rows, naming the other
+  workspace and the app on it. Fields are compared like for like, and the two
+  spellings above compare equal because Hyprland matches a regex against the
+  whole property: one leading `^` and one unescaped trailing `$` are stripped
+  before the comparison. The same match twice *inside* one workspace stays
+  silent — two windows of the same app is what that means — and patterns that
+  merely overlap (`(a|b)` against `a`) are out of scope.
+
+### Notes
+
+- Validation only. No change to the generated Lua, the document format or the
+  schema; the golden 0.1.0 fixtures still compile byte for byte.
+
 ## [0.2.0] — 2026-09-09
 
 Two features: pick apps from the list of installed applications instead of

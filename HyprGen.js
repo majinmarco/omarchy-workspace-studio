@@ -13,7 +13,7 @@
 // untrusted value into the output without it; adding one is a security bug.
 
 var GENERATOR_NAME = "workspace-studio";
-var GENERATOR_VERSION = "0.2.0";
+var GENERATOR_VERSION = "0.2.1";
 
 var GENERATED_PATH = "~/.local/state/omarchy/toggles/hypr/zz-workspace-studio.lua";
 var CONFIG_PATH = "~/.config/omarchy/workspace-studio.json";

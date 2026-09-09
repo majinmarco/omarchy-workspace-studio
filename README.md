@@ -131,6 +131,13 @@ and fills in the class the compositor actually reports, which is the only
 ground truth there is. A class you type or grab yourself is marked *"you set
 this"* and is never overwritten by a later pick.
 
+The footer also warns when two apps on **different** workspaces match the same
+window property, because Hyprland applies one workspace rule to a matching
+window and the other row silently never sees it. `chromium` on workspace 1 and
+`^chromium$` on workspace 6 are the same rule as far as the compositor is
+concerned — it matches the regex against the whole property — so both spellings
+count. The same match twice inside one workspace is fine, and does not warn.
+
 Two details worth knowing. The profile directory in a web app's class is not
 knowable from its entry — `omarchy-launch-webapp` passes no
 `--profile-directory` and Chromium falls back to `last_used` — so the tail is
