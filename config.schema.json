@@ -1,0 +1,205 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/majinmarco/omarchy-workspace-studio/blob/main/config.schema.json",
+  "title": "Workspace Studio configuration",
+  "description": "Documents ~/.config/omarchy/workspace-studio.json, the source of truth for the compositor layer. Purely presentational bar options live in the plugin's inline entry in ~/.config/omarchy/shell.json instead, not here. Config.js normalizes any document to this shape; nothing rejects a file outright.",
+  "type": "object",
+  "required": ["version", "workspaces"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Document version. Older documents are migrated forward by Config.migrate()."
+    },
+    "workspaces": {
+      "type": "array",
+      "maxItems": 12,
+      "description": "The workspaces this config owns, sorted by id. The length IS the workspace count: adding or removing an entry is how the count changes. Ids are stored explicitly rather than implied by position so gaps are allowed.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Hyprland workspace id. 1-10 map onto SUPER+1..0; 11 and 12 need SUPER+minus / SUPER+equal."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 24,
+            "description": "Tooltip, optional bar label, and hl.workspace_rule.default_name."
+          },
+          "icon": {
+            "type": "string",
+            "maxLength": 8,
+            "description": "One or two Nerd Font glyphs. Empty falls back to the workspace number."
+          },
+          "iconName": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "The picker's token for the glyph, e.g. nf-md-briefcase. Stored so the picker round-trips and the file stays readable; nothing reads it at runtime."
+          },
+          "color": {
+            "description": "Per-workspace tint for the bar button.",
+            "anyOf": [
+              { "enum": ["default", "accent", "urgent"] },
+              { "type": "string", "pattern": "^#[0-9a-f]{6}$" }
+            ]
+          },
+          "monitor": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "hl.workspace_rule.monitor. Empty means any monitor."
+          },
+          "persistent": {
+            "type": "boolean",
+            "description": "hl.workspace_rule.persistent: the workspace exists even when empty."
+          },
+          "default": {
+            "type": "boolean",
+            "description": "hl.workspace_rule.default: this workspace is its monitor's default. At most one per monitor."
+          },
+          "layout": {
+            "enum": ["", "dwindle", "master", "scrolling"],
+            "description": "hl.workspace_rule.layout. Note that ~/.local/state/omarchy/workspace-layouts/<id>.lua, written by `omarchy-hyprland-workspace-layout-toggle`, is loaded after this file and therefore wins."
+          },
+          "layoutOpts": {
+            "type": "object",
+            "description": "hl.workspace_rule.layout_opts, e.g. { \"orientation\": \"center\" } for the master layout. Ignored unless layout is set.",
+            "additionalProperties": { "type": ["string", "number", "boolean"] }
+          },
+          "advanced": {
+            "type": "object",
+            "description": "The remaining verified hl.workspace_rule fields. null means 'do not emit', which is different from 0 or false.",
+            "additionalProperties": false,
+            "properties": {
+              "gapsIn": { "type": ["integer", "null"], "minimum": 0, "maximum": 200 },
+              "gapsOut": { "type": ["integer", "null"], "minimum": 0, "maximum": 200 },
+              "borderSize": { "type": ["integer", "null"], "minimum": 0, "maximum": 40 },
+              "decorate": { "type": ["boolean", "null"] },
+              "noRounding": { "type": ["boolean", "null"] },
+              "noBorder": { "type": ["boolean", "null"] },
+              "noShadow": { "type": ["boolean", "null"] }
+            }
+          },
+          "apps": {
+            "type": "array",
+            "description": "The apps that live on this workspace: a window rule that routes them here, and optionally a way to start them.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "maxLength": 48,
+                  "description": "Display only; never emitted into Lua except as part of the rule name."
+                },
+                "match": {
+                  "type": "object",
+                  "description": "hl.window_rule.match. Values are regexes matched in full. At least one non-empty key is needed for a window rule to be emitted.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "class": { "type": "string", "maxLength": 512 },
+                    "title": { "type": "string", "maxLength": 512 },
+                    "initialClass": { "type": "string", "maxLength": 512, "description": "Emitted as initial_class. Safer than class for apps that rewrite their class at runtime." },
+                    "initialTitle": { "type": "string", "maxLength": 512, "description": "Emitted as initial_title." }
+                  }
+                },
+                "launch": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "mode": {
+                      "enum": ["none", "onCreatedEmpty", "autostart"],
+                      "description": "none emits only the window rule. onCreatedEmpty becomes hl.workspace_rule.on_created_empty, so the app starts the first time you land on the empty workspace - no boot cost and no sleep races. autostart becomes o.launch_on_start / o.exec_on_start, i.e. login-time only."
+                    },
+                    "launcher": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "description": "Key into the top-level launchers table. When set, the command is that launcher's command plus args."
+                    },
+                    "command": {
+                      "type": "string",
+                      "maxLength": 1024,
+                      "description": "Raw command, used when no launcher is chosen. Always wrapped in o.launch() (uwsm-app) on the way out."
+                    },
+                    "args": { "type": "string", "maxLength": 1024, "description": "Appended to the launcher's command." },
+                    "delaySec": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 120,
+                      "description": "autostart only: emits \"sleep N && \". Used to stagger web apps behind the browser that owns their profile."
+                    }
+                  }
+                },
+                "rules": {
+                  "type": "object",
+                  "description": "Extra hl.window_rule effects.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "float": { "type": ["boolean", "null"], "description": "true emits float, false emits tile, null emits neither." },
+                    "size": { "type": "string", "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$", "description": "e.g. \"800 600\"." },
+                    "move": { "type": "string", "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$", "description": "e.g. \"100 100\"." },
+                    "silent": { "type": "boolean", "description": "Emits workspace \"N silent\": the window lands there without pulling focus." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "launchers": {
+      "type": "object",
+      "description": "Shared command prefixes, so a browser profile flag is typed once instead of on every web app.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["command"],
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string", "maxLength": 64 },
+          "command": { "type": "string", "maxLength": 1024 }
+        }
+      }
+    },
+    "binds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Emit workspace binds at all." },
+        "focusMods": { "type": "string", "description": "Modifiers for 'switch to workspace N'." },
+        "moveMods": { "type": "string", "description": "Modifiers for 'move window to workspace N'." },
+        "moveSilentMods": { "type": "string", "description": "Modifiers for 'move window silently to workspace N'." },
+        "keysyms": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+          "description": "Key per workspace position. KEYSYMS ONLY: Hyprland 0.56.2 silently drops \"code:NN\" bind keycodes, which then match on the modifier mask alone and fire every bind sharing that mask. The generator refuses anything starting with 'code'."
+        },
+        "unbindUnused": {
+          "type": "boolean",
+          "description": "Unbind SUPER+N for the workspaces this config does not define, so Omarchy's stock ten binds do not outlive a deleted workspace."
+        }
+      }
+    },
+    "apply": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reloadMode": {
+          "enum": ["config-only", "full", "eval-only"],
+          "description": "config-only is the default: it rebuilds rules and binds without re-applying monitor config. Runtime rules cannot be removed once registered, so a real apply is always a reload; eval-only is preview and additive changes only."
+        },
+        "landOn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "Workspace to focus after an autostart restore. 0 disables. Only emitted when something actually autostarts."
+        }
+      }
+    }
+  }
+}

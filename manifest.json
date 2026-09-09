@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "id": "majinmarco.workspace-studio",
+  "name": "Workspace Studio",
+  "version": "0.1.0",
+  "author": "majinmarco",
+  "license": "MIT",
+  "description": "Design your Hyprland workspaces: how many, an icon and name for each, a default layout, and the apps that live there - from a native Omarchy panel.",
+  "kinds": ["bar-widget", "overlay"],
+  "entryPoints": {
+    "barWidget": "Workspaces.qml",
+    "overlay": "Studio.qml"
+  },
+  "barWidget": {
+    "displayName": "Workspace Studio",
+    "description": "Workspace indicators with per-workspace icons, and the editor that configures them.",
+    "category": "Compositor",
+    "aliases": ["workspaces", "workspace-studio", "wsstudio"],
+    "allowMultiple": false,
+    "defaultSection": "left",
+    "defaults": {
+      "showMode": "auto",
+      "showNames": false,
+      "showEmpty": "auto",
+      "dimEmpty": true,
+      "emptyOpacity": 0.5,
+      "includeUnconfigured": true,
+      "focusStyle": "underline",
+      "focusIndicatorColor": "foreground",
+      "focusIndicatorThickness": 2,
+      "slotWidthMode": "auto",
+      "slotMinWidth": 26,
+      "slotSpacing": 6,
+      "iconFontSize": "body",
+      "tooltipMode": "name",
+      "rightClick": "openStudio",
+      "wheelAction": "none"
+    },
+    "schema": [
+      {
+        "key": "showMode",
+        "type": "enum",
+        "label": "What each button shows",
+        "options": ["auto", "icon", "number", "iconAndNumber", "iconAndName", "name"],
+        "defaultValue": "auto",
+        "description": "auto follows 'Show workspace names'. Icon modes fall back to the number when a workspace has no icon."
+      },
+      {
+        "key": "showNames",
+        "type": "boolean",
+        "label": "Show workspace names next to icons",
+        "defaultValue": false,
+        "description": "Shortcut that turns 'auto' display mode into icon + name."
+      },
+      {
+        "key": "showEmpty",
+        "type": "enum",
+        "label": "Empty workspaces",
+        "options": ["auto", "always", "dim", "hide"],
+        "defaultValue": "auto",
+        "description": "auto follows 'Dim empty workspaces'. Workspaces marked persistent are always drawn."
+      },
+      {
+        "key": "dimEmpty",
+        "type": "boolean",
+        "label": "Dim empty workspaces",
+        "defaultValue": true,
+        "description": "Shortcut that turns 'auto' empty handling into dim or always."
+      },
+      {
+        "key": "emptyOpacity",
+        "type": "string",
+        "label": "Dimmed opacity (0.0 - 1.0)",
+        "defaultValue": 0.5
+      },
+      {
+        "key": "includeUnconfigured",
+        "type": "boolean",
+        "label": "Also show live workspaces that have no configured row",
+        "defaultValue": true
+      },
+      {
+        "key": "focusStyle",
+        "type": "enum",
+        "label": "Focused workspace style",
+        "options": ["underline", "marker", "accent", "fill", "bold", "none"],
+        "defaultValue": "underline"
+      },
+      {
+        "key": "focusIndicatorColor",
+        "type": "enum",
+        "label": "Focus indicator colour",
+        "options": ["foreground", "accent", "urgent"],
+        "defaultValue": "foreground"
+      },
+      {
+        "key": "focusIndicatorThickness",
+        "type": "integer",
+        "label": "Focus indicator thickness (px)",
+        "min": 1,
+        "max": 8,
+        "step": 1,
+        "defaultValue": 2
+      },
+      {
+        "key": "slotWidthMode",
+        "type": "enum",
+        "label": "Button width",
+        "options": ["auto", "fixed"],
+        "defaultValue": "auto",
+        "description": "auto grows to fit multi-glyph labels; fixed reproduces the stock 20-unit slot."
+      },
+      {
+        "key": "slotMinWidth",
+        "type": "integer",
+        "label": "Minimum button width",
+        "min": 12,
+        "max": 120,
+        "step": 1,
+        "defaultValue": 26
+      },
+      {
+        "key": "slotSpacing",
+        "type": "integer",
+        "label": "Gap between buttons",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "defaultValue": 6
+      },
+      {
+        "key": "iconFontSize",
+        "type": "enum",
+        "label": "Icon size",
+        "options": ["caption", "bodySmall", "body", "subtitle", "title", "heading", "icon", "iconLarge"],
+        "defaultValue": "body"
+      },
+      {
+        "key": "tooltipMode",
+        "type": "enum",
+        "label": "Tooltip",
+        "options": ["none", "number", "name", "nameAndApps"],
+        "defaultValue": "name"
+      },
+      {
+        "key": "rightClick",
+        "type": "enum",
+        "label": "Right click",
+        "options": ["openStudio", "moveWindowHere", "none"],
+        "defaultValue": "openStudio"
+      },
+      {
+        "key": "wheelAction",
+        "type": "enum",
+        "label": "Scroll wheel",
+        "options": ["none", "cycleWorkspace", "cycleOccupied"],
+        "defaultValue": "none",
+        "description": "Omarchy already binds SUPER+wheel at the compositor level; off by default to avoid double-cycling."
+      }
+    ]
+  }
+}

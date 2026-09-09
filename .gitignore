@@ -1,0 +1,7 @@
+# Nothing here is built, so this list is short on purpose.
+node_modules/
+*.log
+*.orig
+*.rej
+*.bak
+.DS_Store

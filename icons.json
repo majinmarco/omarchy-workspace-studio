@@ -1,0 +1,2720 @@
+{
+  "version": 1,
+  "font": "JetBrainsMono Nerd Font",
+  "groups": [
+    "Apps & Browsers",
+    "Terminals & Code",
+    "Cloud & Servers",
+    "Communication",
+    "AI & Science",
+    "Media",
+    "Files & Documents",
+    "System & Devices",
+    "Numbers & Shapes",
+    "Nature & Misc"
+  ],
+  "icons": [
+    {
+      "name": "nf-cod-browser",
+      "cp": "EAAE",
+      "glyph": "",
+      "group": "Apps & Browsers",
+      "keywords": "web window page"
+    },
+    {
+      "name": "nf-fa-chrome",
+      "cp": "F268",
+      "glyph": "",
+      "group": "Apps & Browsers",
+      "keywords": "google browser web"
+    },
+    {
+      "name": "nf-fa-opera",
+      "cp": "F26A",
+      "glyph": "",
+      "group": "Apps & Browsers",
+      "keywords": "browser web"
+    },
+    {
+      "name": "nf-fa-safari",
+      "cp": "F267",
+      "glyph": "",
+      "group": "Apps & Browsers",
+      "keywords": "apple browser web"
+    },
+    {
+      "name": "nf-md-alarm",
+      "cp": "F0020",
+      "glyph": "󰀠",
+      "group": "Apps & Browsers",
+      "keywords": "clock wake reminder"
+    },
+    {
+      "name": "nf-md-application",
+      "cp": "F08C6",
+      "glyph": "󰣆",
+      "group": "Apps & Browsers",
+      "keywords": "program app window"
+    },
+    {
+      "name": "nf-md-apps",
+      "cp": "F003B",
+      "glyph": "󰀻",
+      "group": "Apps & Browsers",
+      "keywords": "grid launcher programs"
+    },
+    {
+      "name": "nf-md-bookmark",
+      "cp": "F00C0",
+      "glyph": "󰃀",
+      "group": "Apps & Browsers",
+      "keywords": "save favourite mark"
+    },
+    {
+      "name": "nf-md-briefcase",
+      "cp": "F00D6",
+      "glyph": "󰃖",
+      "group": "Apps & Browsers",
+      "keywords": "work job case"
+    },
+    {
+      "name": "nf-md-calendar",
+      "cp": "F00ED",
+      "glyph": "󰃭",
+      "group": "Apps & Browsers",
+      "keywords": "date schedule month"
+    },
+    {
+      "name": "nf-md-calendar_check",
+      "cp": "F00EF",
+      "glyph": "󰃯",
+      "group": "Apps & Browsers",
+      "keywords": "appointment done schedule"
+    },
+    {
+      "name": "nf-md-checkbox_marked_circle",
+      "cp": "F0133",
+      "glyph": "󰄳",
+      "group": "Apps & Browsers",
+      "keywords": "done complete tick"
+    },
+    {
+      "name": "nf-md-clipboard_text",
+      "cp": "F014D",
+      "glyph": "󰅍",
+      "group": "Apps & Browsers",
+      "keywords": "copy paste board"
+    },
+    {
+      "name": "nf-md-clock_outline",
+      "cp": "F0150",
+      "glyph": "󰅐",
+      "group": "Apps & Browsers",
+      "keywords": "time hour watch"
+    },
+    {
+      "name": "nf-md-cog",
+      "cp": "F0493",
+      "glyph": "󰒓",
+      "group": "Apps & Browsers",
+      "keywords": "settings gear preferences"
+    },
+    {
+      "name": "nf-md-compass",
+      "cp": "F018B",
+      "glyph": "󰆋",
+      "group": "Apps & Browsers",
+      "keywords": "navigate direction explore"
+    },
+    {
+      "name": "nf-md-credit_card",
+      "cp": "F0FEF",
+      "glyph": "󰿯",
+      "group": "Apps & Browsers",
+      "keywords": "payment bank money"
+    },
+    {
+      "name": "nf-md-earth",
+      "cp": "F01E7",
+      "glyph": "󰇧",
+      "group": "Apps & Browsers",
+      "keywords": "globe world web"
+    },
+    {
+      "name": "nf-md-file_tree",
+      "cp": "F0645",
+      "glyph": "󰙅",
+      "group": "Apps & Browsers",
+      "keywords": "hierarchy structure nodes"
+    },
+    {
+      "name": "nf-md-firefox",
+      "cp": "F0239",
+      "glyph": "󰈹",
+      "group": "Apps & Browsers",
+      "keywords": "mozilla browser web"
+    },
+    {
+      "name": "nf-md-format_list_checks",
+      "cp": "F0756",
+      "glyph": "󰝖",
+      "group": "Apps & Browsers",
+      "keywords": "todo tasks list"
+    },
+    {
+      "name": "nf-md-google_chrome",
+      "cp": "F02AF",
+      "glyph": "󰊯",
+      "group": "Apps & Browsers",
+      "keywords": "browser web google"
+    },
+    {
+      "name": "nf-md-incognito",
+      "cp": "F05F9",
+      "glyph": "󰗹",
+      "group": "Apps & Browsers",
+      "keywords": "private anonymous hidden"
+    },
+    {
+      "name": "nf-md-magnify",
+      "cp": "F0349",
+      "glyph": "󰍉",
+      "group": "Apps & Browsers",
+      "keywords": "search find zoom"
+    },
+    {
+      "name": "nf-md-microsoft_edge",
+      "cp": "F01E9",
+      "glyph": "󰇩",
+      "group": "Apps & Browsers",
+      "keywords": "browser web microsoft"
+    },
+    {
+      "name": "nf-md-note_text",
+      "cp": "F039E",
+      "glyph": "󰎞",
+      "group": "Apps & Browsers",
+      "keywords": "memo writing paper"
+    },
+    {
+      "name": "nf-md-notebook",
+      "cp": "F082E",
+      "glyph": "󰠮",
+      "group": "Apps & Browsers",
+      "keywords": "notes journal writing"
+    },
+    {
+      "name": "nf-md-package_variant",
+      "cp": "F03D6",
+      "glyph": "󰏖",
+      "group": "Apps & Browsers",
+      "keywords": "box parcel bundle"
+    },
+    {
+      "name": "nf-md-puzzle",
+      "cp": "F0431",
+      "glyph": "󰐱",
+      "group": "Apps & Browsers",
+      "keywords": "plugin extension addon"
+    },
+    {
+      "name": "nf-md-shopping",
+      "cp": "F049A",
+      "glyph": "󰒚",
+      "group": "Apps & Browsers",
+      "keywords": "cart buy commerce"
+    },
+    {
+      "name": "nf-md-store",
+      "cp": "F04DC",
+      "glyph": "󰓜",
+      "group": "Apps & Browsers",
+      "keywords": "shop market buy"
+    },
+    {
+      "name": "nf-md-tab",
+      "cp": "F04E9",
+      "glyph": "󰓩",
+      "group": "Apps & Browsers",
+      "keywords": "window pane sheet"
+    },
+    {
+      "name": "nf-md-tune",
+      "cp": "F062E",
+      "glyph": "󰘮",
+      "group": "Apps & Browsers",
+      "keywords": "sliders adjust settings"
+    },
+    {
+      "name": "nf-md-view_dashboard",
+      "cp": "F056E",
+      "glyph": "󰕮",
+      "group": "Apps & Browsers",
+      "keywords": "panel overview home"
+    },
+    {
+      "name": "nf-md-wallet",
+      "cp": "F0584",
+      "glyph": "󰖄",
+      "group": "Apps & Browsers",
+      "keywords": "money purse cash"
+    },
+    {
+      "name": "nf-md-web",
+      "cp": "F059F",
+      "glyph": "󰖟",
+      "group": "Apps & Browsers",
+      "keywords": "internet www site"
+    },
+    {
+      "name": "nf-md-widgets",
+      "cp": "F072C",
+      "glyph": "󰜬",
+      "group": "Apps & Browsers",
+      "keywords": "blocks components modules"
+    },
+    {
+      "name": "nf-cod-terminal_bash",
+      "cp": "EBCA",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "shell script gnu"
+    },
+    {
+      "name": "nf-cod-terminal_powershell",
+      "cp": "EBC7",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "shell windows script"
+    },
+    {
+      "name": "nf-cod-terminal_tmux",
+      "cp": "EBC8",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "multiplexer session panes"
+    },
+    {
+      "name": "nf-dev-git",
+      "cp": "E702",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "vcs version scm"
+    },
+    {
+      "name": "nf-dev-nodejs_small",
+      "cp": "E718",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "js runtime server"
+    },
+    {
+      "name": "nf-dev-vim",
+      "cp": "E7C5",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "editor modal neovim"
+    },
+    {
+      "name": "nf-dev-vscode",
+      "cp": "E8DA",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "editor ide microsoft"
+    },
+    {
+      "name": "nf-fa-code",
+      "cp": "F121",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "program source dev"
+    },
+    {
+      "name": "nf-fa-github",
+      "cp": "F09B",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "repo vcs octocat"
+    },
+    {
+      "name": "nf-fa-terminal",
+      "cp": "F120",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "shell console cli"
+    },
+    {
+      "name": "nf-md-api",
+      "cp": "F109B",
+      "glyph": "󱂛",
+      "group": "Terminals & Code",
+      "keywords": "endpoint interface rest"
+    },
+    {
+      "name": "nf-md-bug",
+      "cp": "F00E4",
+      "glyph": "󰃤",
+      "group": "Terminals & Code",
+      "keywords": "defect insect error"
+    },
+    {
+      "name": "nf-md-bug_check",
+      "cp": "F0A2E",
+      "glyph": "󰨮",
+      "group": "Terminals & Code",
+      "keywords": "fixed defect verified"
+    },
+    {
+      "name": "nf-md-code_braces",
+      "cp": "F0169",
+      "glyph": "󰅩",
+      "group": "Terminals & Code",
+      "keywords": "block scope json"
+    },
+    {
+      "name": "nf-md-code_brackets",
+      "cp": "F016A",
+      "glyph": "󰅪",
+      "group": "Terminals & Code",
+      "keywords": "array list index"
+    },
+    {
+      "name": "nf-md-code_json",
+      "cp": "F0626",
+      "glyph": "󰘦",
+      "group": "Terminals & Code",
+      "keywords": "data object config"
+    },
+    {
+      "name": "nf-md-code_tags",
+      "cp": "F0174",
+      "glyph": "󰅴",
+      "group": "Terminals & Code",
+      "keywords": "html markup xml"
+    },
+    {
+      "name": "nf-md-console",
+      "cp": "F018D",
+      "glyph": "󰆍",
+      "group": "Terminals & Code",
+      "keywords": "shell terminal prompt"
+    },
+    {
+      "name": "nf-md-console_line",
+      "cp": "F07B7",
+      "glyph": "󰞷",
+      "group": "Terminals & Code",
+      "keywords": "shell prompt command"
+    },
+    {
+      "name": "nf-md-docker",
+      "cp": "F0868",
+      "glyph": "󰡨",
+      "group": "Terminals & Code",
+      "keywords": "container image whale"
+    },
+    {
+      "name": "nf-md-function",
+      "cp": "F0295",
+      "glyph": "󰊕",
+      "group": "Terminals & Code",
+      "keywords": "method lambda def"
+    },
+    {
+      "name": "nf-md-language_c",
+      "cp": "F0671",
+      "glyph": "󰙱",
+      "group": "Terminals & Code",
+      "keywords": "clang systems compiled"
+    },
+    {
+      "name": "nf-md-language_cpp",
+      "cp": "F0672",
+      "glyph": "󰙲",
+      "group": "Terminals & Code",
+      "keywords": "cplusplus systems compiled"
+    },
+    {
+      "name": "nf-md-language_css3",
+      "cp": "F031C",
+      "glyph": "󰌜",
+      "group": "Terminals & Code",
+      "keywords": "style sheet web"
+    },
+    {
+      "name": "nf-md-language_go",
+      "cp": "F07D3",
+      "glyph": "󰟓",
+      "group": "Terminals & Code",
+      "keywords": "golang gopher systems"
+    },
+    {
+      "name": "nf-md-language_html5",
+      "cp": "F031D",
+      "glyph": "󰌝",
+      "group": "Terminals & Code",
+      "keywords": "markup web page"
+    },
+    {
+      "name": "nf-md-language_java",
+      "cp": "F0B37",
+      "glyph": "󰬷",
+      "group": "Terminals & Code",
+      "keywords": "jvm coffee enterprise"
+    },
+    {
+      "name": "nf-md-language_javascript",
+      "cp": "F031E",
+      "glyph": "󰌞",
+      "group": "Terminals & Code",
+      "keywords": "js script web"
+    },
+    {
+      "name": "nf-md-language_lua",
+      "cp": "F08B1",
+      "glyph": "󰢱",
+      "group": "Terminals & Code",
+      "keywords": "script moon embedded"
+    },
+    {
+      "name": "nf-md-language_php",
+      "cp": "F031F",
+      "glyph": "󰌟",
+      "group": "Terminals & Code",
+      "keywords": "web script server"
+    },
+    {
+      "name": "nf-md-language_python",
+      "cp": "F0320",
+      "glyph": "󰌠",
+      "group": "Terminals & Code",
+      "keywords": "snake script py"
+    },
+    {
+      "name": "nf-md-language_ruby",
+      "cp": "F0D2D",
+      "glyph": "󰴭",
+      "group": "Terminals & Code",
+      "keywords": "gem rails script"
+    },
+    {
+      "name": "nf-md-language_rust",
+      "cp": "F1617",
+      "glyph": "󱘗",
+      "group": "Terminals & Code",
+      "keywords": "crab systems cargo"
+    },
+    {
+      "name": "nf-md-language_typescript",
+      "cp": "F06E6",
+      "glyph": "󰛦",
+      "group": "Terminals & Code",
+      "keywords": "ts typed script"
+    },
+    {
+      "name": "nf-md-nix",
+      "cp": "F1105",
+      "glyph": "󱄅",
+      "group": "Terminals & Code",
+      "keywords": "nixos package functional"
+    },
+    {
+      "name": "nf-md-npm",
+      "cp": "F06F7",
+      "glyph": "󰛷",
+      "group": "Terminals & Code",
+      "keywords": "node package registry"
+    },
+    {
+      "name": "nf-md-regex",
+      "cp": "F0451",
+      "glyph": "󰑑",
+      "group": "Terminals & Code",
+      "keywords": "pattern match expression"
+    },
+    {
+      "name": "nf-md-source_branch",
+      "cp": "F062C",
+      "glyph": "󰘬",
+      "group": "Terminals & Code",
+      "keywords": "git fork branch"
+    },
+    {
+      "name": "nf-md-source_commit",
+      "cp": "F0718",
+      "glyph": "󰜘",
+      "group": "Terminals & Code",
+      "keywords": "git revision change"
+    },
+    {
+      "name": "nf-md-source_merge",
+      "cp": "F062D",
+      "glyph": "󰘭",
+      "group": "Terminals & Code",
+      "keywords": "git merge join"
+    },
+    {
+      "name": "nf-md-source_pull",
+      "cp": "F04C2",
+      "glyph": "󰓂",
+      "group": "Terminals & Code",
+      "keywords": "pull request merge"
+    },
+    {
+      "name": "nf-md-test_tube",
+      "cp": "F0668",
+      "glyph": "󰙨",
+      "group": "Terminals & Code",
+      "keywords": "experiment lab unit"
+    },
+    {
+      "name": "nf-md-variable",
+      "cp": "F0AE7",
+      "glyph": "󰫧",
+      "group": "Terminals & Code",
+      "keywords": "symbol value binding"
+    },
+    {
+      "name": "nf-md-vector_square",
+      "cp": "F0001",
+      "glyph": "󰀁",
+      "group": "Terminals & Code",
+      "keywords": "shape geometry draw"
+    },
+    {
+      "name": "nf-md-webhook",
+      "cp": "F062F",
+      "glyph": "󰘯",
+      "group": "Terminals & Code",
+      "keywords": "callback http event"
+    },
+    {
+      "name": "nf-md-xml",
+      "cp": "F05C0",
+      "glyph": "󰗀",
+      "group": "Terminals & Code",
+      "keywords": "markup tags document"
+    },
+    {
+      "name": "nf-oct-issue_opened",
+      "cp": "F41B",
+      "glyph": "",
+      "group": "Terminals & Code",
+      "keywords": "bug ticket task"
+    },
+    {
+      "name": "nf-md-ansible",
+      "cp": "F109A",
+      "glyph": "󱂚",
+      "group": "Cloud & Servers",
+      "keywords": "automation config provision"
+    },
+    {
+      "name": "nf-md-aws",
+      "cp": "F0E0F",
+      "glyph": "󰸏",
+      "group": "Cloud & Servers",
+      "keywords": "amazon web services"
+    },
+    {
+      "name": "nf-md-backup_restore",
+      "cp": "F006F",
+      "glyph": "󰁯",
+      "group": "Cloud & Servers",
+      "keywords": "snapshot recover archive"
+    },
+    {
+      "name": "nf-md-chart_timeline_variant",
+      "cp": "F0E93",
+      "glyph": "󰺓",
+      "group": "Cloud & Servers",
+      "keywords": "metrics monitor graph"
+    },
+    {
+      "name": "nf-md-cloud",
+      "cp": "F015F",
+      "glyph": "󰅟",
+      "group": "Cloud & Servers",
+      "keywords": "remote hosting sky"
+    },
+    {
+      "name": "nf-md-cloud_download",
+      "cp": "F0162",
+      "glyph": "󰅢",
+      "group": "Cloud & Servers",
+      "keywords": "pull sync remote"
+    },
+    {
+      "name": "nf-md-cloud_lock",
+      "cp": "F11F1",
+      "glyph": "󱇱",
+      "group": "Cloud & Servers",
+      "keywords": "secure private remote"
+    },
+    {
+      "name": "nf-md-cloud_sync",
+      "cp": "F063F",
+      "glyph": "󰘿",
+      "group": "Cloud & Servers",
+      "keywords": "replicate mirror remote"
+    },
+    {
+      "name": "nf-md-cloud_upload",
+      "cp": "F0167",
+      "glyph": "󰅧",
+      "group": "Cloud & Servers",
+      "keywords": "push sync remote"
+    },
+    {
+      "name": "nf-md-database",
+      "cp": "F01BC",
+      "glyph": "󰆼",
+      "group": "Cloud & Servers",
+      "keywords": "sql store records"
+    },
+    {
+      "name": "nf-md-database_search",
+      "cp": "F0866",
+      "glyph": "󰡦",
+      "group": "Cloud & Servers",
+      "keywords": "query lookup records"
+    },
+    {
+      "name": "nf-md-database_sync",
+      "cp": "F0CFF",
+      "glyph": "󰳿",
+      "group": "Cloud & Servers",
+      "keywords": "replicate mirror records"
+    },
+    {
+      "name": "nf-md-dns",
+      "cp": "F01D6",
+      "glyph": "󰇖",
+      "group": "Cloud & Servers",
+      "keywords": "domain name resolve"
+    },
+    {
+      "name": "nf-md-google_cloud",
+      "cp": "F11F6",
+      "glyph": "󱇶",
+      "group": "Cloud & Servers",
+      "keywords": "gcp platform hosting"
+    },
+    {
+      "name": "nf-md-harddisk",
+      "cp": "F02CA",
+      "glyph": "󰋊",
+      "group": "Cloud & Servers",
+      "keywords": "storage drive disk"
+    },
+    {
+      "name": "nf-md-ip_network",
+      "cp": "F0A60",
+      "glyph": "󰩠",
+      "group": "Cloud & Servers",
+      "keywords": "address routing net"
+    },
+    {
+      "name": "nf-md-key_variant",
+      "cp": "F030B",
+      "glyph": "󰌋",
+      "group": "Cloud & Servers",
+      "keywords": "secret credential auth"
+    },
+    {
+      "name": "nf-md-kubernetes",
+      "cp": "F10FE",
+      "glyph": "󱃾",
+      "group": "Cloud & Servers",
+      "keywords": "k8s orchestration cluster"
+    },
+    {
+      "name": "nf-md-lan",
+      "cp": "F0317",
+      "glyph": "󰌗",
+      "group": "Cloud & Servers",
+      "keywords": "network local wired"
+    },
+    {
+      "name": "nf-md-lan_connect",
+      "cp": "F0318",
+      "glyph": "󰌘",
+      "group": "Cloud & Servers",
+      "keywords": "link network online"
+    },
+    {
+      "name": "nf-md-microsoft_azure",
+      "cp": "F0805",
+      "glyph": "󰠅",
+      "group": "Cloud & Servers",
+      "keywords": "cloud platform hosting"
+    },
+    {
+      "name": "nf-md-nas",
+      "cp": "F08F3",
+      "glyph": "󰣳",
+      "group": "Cloud & Servers",
+      "keywords": "storage network array"
+    },
+    {
+      "name": "nf-md-network",
+      "cp": "F06F3",
+      "glyph": "󰛳",
+      "group": "Cloud & Servers",
+      "keywords": "topology nodes connect"
+    },
+    {
+      "name": "nf-md-power_plug",
+      "cp": "F06A5",
+      "glyph": "󰚥",
+      "group": "Cloud & Servers",
+      "keywords": "connect socket supply"
+    },
+    {
+      "name": "nf-md-pulse",
+      "cp": "F0430",
+      "glyph": "󰐰",
+      "group": "Cloud & Servers",
+      "keywords": "health heartbeat monitor"
+    },
+    {
+      "name": "nf-md-router_network",
+      "cp": "F1087",
+      "glyph": "󱂇",
+      "group": "Cloud & Servers",
+      "keywords": "gateway wifi net"
+    },
+    {
+      "name": "nf-md-router_wireless",
+      "cp": "F0469",
+      "glyph": "󰑩",
+      "group": "Cloud & Servers",
+      "keywords": "wifi access point"
+    },
+    {
+      "name": "nf-md-server",
+      "cp": "F048B",
+      "glyph": "󰒋",
+      "group": "Cloud & Servers",
+      "keywords": "host machine rack"
+    },
+    {
+      "name": "nf-md-server_network",
+      "cp": "F048D",
+      "glyph": "󰒍",
+      "group": "Cloud & Servers",
+      "keywords": "cluster hosts lan"
+    },
+    {
+      "name": "nf-md-server_security",
+      "cp": "F0492",
+      "glyph": "󰒒",
+      "group": "Cloud & Servers",
+      "keywords": "hardened protected host"
+    },
+    {
+      "name": "nf-md-shield_lock",
+      "cp": "F099D",
+      "glyph": "󰦝",
+      "group": "Cloud & Servers",
+      "keywords": "secure protect guard"
+    },
+    {
+      "name": "nf-md-speedometer",
+      "cp": "F04C5",
+      "glyph": "󰓅",
+      "group": "Cloud & Servers",
+      "keywords": "performance benchmark gauge"
+    },
+    {
+      "name": "nf-md-ssh",
+      "cp": "F08C0",
+      "glyph": "󰣀",
+      "group": "Cloud & Servers",
+      "keywords": "remote shell secure"
+    },
+    {
+      "name": "nf-md-terraform",
+      "cp": "F1062",
+      "glyph": "󱁢",
+      "group": "Cloud & Servers",
+      "keywords": "infrastructure iac provision"
+    },
+    {
+      "name": "nf-md-vpn",
+      "cp": "F0582",
+      "glyph": "󰖂",
+      "group": "Cloud & Servers",
+      "keywords": "tunnel private secure"
+    },
+    {
+      "name": "nf-md-web_plus",
+      "cp": "F0033",
+      "glyph": "󰀳",
+      "group": "Cloud & Servers",
+      "keywords": "site domain add"
+    },
+    {
+      "name": "nf-fa-envelope",
+      "cp": "F0E0",
+      "glyph": "",
+      "group": "Communication",
+      "keywords": "mail letter inbox"
+    },
+    {
+      "name": "nf-fa-slack",
+      "cp": "F198",
+      "glyph": "",
+      "group": "Communication",
+      "keywords": "chat team workspace"
+    },
+    {
+      "name": "nf-fa-whatsapp",
+      "cp": "F232",
+      "glyph": "",
+      "group": "Communication",
+      "keywords": "chat messaging phone"
+    },
+    {
+      "name": "nf-md-account",
+      "cp": "F0004",
+      "glyph": "󰀄",
+      "group": "Communication",
+      "keywords": "user person profile"
+    },
+    {
+      "name": "nf-md-account_circle",
+      "cp": "F0009",
+      "glyph": "󰀉",
+      "group": "Communication",
+      "keywords": "user avatar profile"
+    },
+    {
+      "name": "nf-md-account_group",
+      "cp": "F0849",
+      "glyph": "󰡉",
+      "group": "Communication",
+      "keywords": "team people users"
+    },
+    {
+      "name": "nf-md-at",
+      "cp": "F0065",
+      "glyph": "󰁥",
+      "group": "Communication",
+      "keywords": "mention handle address"
+    },
+    {
+      "name": "nf-md-bell",
+      "cp": "F009A",
+      "glyph": "󰂚",
+      "group": "Communication",
+      "keywords": "notification alert ring"
+    },
+    {
+      "name": "nf-md-bell_ring",
+      "cp": "F009E",
+      "glyph": "󰂞",
+      "group": "Communication",
+      "keywords": "notification alert active"
+    },
+    {
+      "name": "nf-md-broadcast",
+      "cp": "F1720",
+      "glyph": "󱜠",
+      "group": "Communication",
+      "keywords": "stream transmit live"
+    },
+    {
+      "name": "nf-md-bullhorn",
+      "cp": "F00E6",
+      "glyph": "󰃦",
+      "group": "Communication",
+      "keywords": "announce megaphone news"
+    },
+    {
+      "name": "nf-md-chat",
+      "cp": "F0B79",
+      "glyph": "󰭹",
+      "group": "Communication",
+      "keywords": "talk conversation bubble"
+    },
+    {
+      "name": "nf-md-chat_processing",
+      "cp": "F0B7B",
+      "glyph": "󰭻",
+      "group": "Communication",
+      "keywords": "typing conversation active"
+    },
+    {
+      "name": "nf-md-comment_multiple",
+      "cp": "F085F",
+      "glyph": "󰡟",
+      "group": "Communication",
+      "keywords": "replies discussion notes"
+    },
+    {
+      "name": "nf-md-discord",
+      "cp": "F066F",
+      "glyph": "󰙯",
+      "group": "Communication",
+      "keywords": "chat gaming voice"
+    },
+    {
+      "name": "nf-md-email",
+      "cp": "F01EE",
+      "glyph": "󰇮",
+      "group": "Communication",
+      "keywords": "mail letter inbox"
+    },
+    {
+      "name": "nf-md-email_open",
+      "cp": "F01EF",
+      "glyph": "󰇯",
+      "group": "Communication",
+      "keywords": "read mail letter"
+    },
+    {
+      "name": "nf-md-forum",
+      "cp": "F028C",
+      "glyph": "󰊌",
+      "group": "Communication",
+      "keywords": "discussion chat thread"
+    },
+    {
+      "name": "nf-md-inbox",
+      "cp": "F0687",
+      "glyph": "󰚇",
+      "group": "Communication",
+      "keywords": "mail tray incoming"
+    },
+    {
+      "name": "nf-md-linkedin",
+      "cp": "F033B",
+      "glyph": "󰌻",
+      "group": "Communication",
+      "keywords": "professional social network"
+    },
+    {
+      "name": "nf-md-mastodon",
+      "cp": "F0AD1",
+      "glyph": "󰫑",
+      "group": "Communication",
+      "keywords": "fediverse social toot"
+    },
+    {
+      "name": "nf-md-message_reply_text",
+      "cp": "F0368",
+      "glyph": "󰍨",
+      "group": "Communication",
+      "keywords": "answer chat respond"
+    },
+    {
+      "name": "nf-md-message_text",
+      "cp": "F0369",
+      "glyph": "󰍩",
+      "group": "Communication",
+      "keywords": "chat sms talk"
+    },
+    {
+      "name": "nf-md-microsoft_teams",
+      "cp": "F02BB",
+      "glyph": "󰊻",
+      "group": "Communication",
+      "keywords": "chat meeting work"
+    },
+    {
+      "name": "nf-md-phone",
+      "cp": "F03F2",
+      "glyph": "󰏲",
+      "group": "Communication",
+      "keywords": "call telephone dial"
+    },
+    {
+      "name": "nf-md-phone_in_talk",
+      "cp": "F03F6",
+      "glyph": "󰏶",
+      "group": "Communication",
+      "keywords": "active call ongoing"
+    },
+    {
+      "name": "nf-md-reddit",
+      "cp": "F044D",
+      "glyph": "󰑍",
+      "group": "Communication",
+      "keywords": "forum social threads"
+    },
+    {
+      "name": "nf-md-rss",
+      "cp": "F046B",
+      "glyph": "󰑫",
+      "group": "Communication",
+      "keywords": "feed subscribe syndication"
+    },
+    {
+      "name": "nf-md-send",
+      "cp": "F048A",
+      "glyph": "󰒊",
+      "group": "Communication",
+      "keywords": "submit deliver post"
+    },
+    {
+      "name": "nf-md-share_variant",
+      "cp": "F0497",
+      "glyph": "󰒗",
+      "group": "Communication",
+      "keywords": "send distribute social"
+    },
+    {
+      "name": "nf-md-signal",
+      "cp": "F04A2",
+      "glyph": "󰒢",
+      "group": "Communication",
+      "keywords": "secure chat private"
+    },
+    {
+      "name": "nf-md-twitter",
+      "cp": "F0544",
+      "glyph": "󰕄",
+      "group": "Communication",
+      "keywords": "tweet social bird"
+    },
+    {
+      "name": "nf-md-video",
+      "cp": "F0567",
+      "glyph": "󰕧",
+      "group": "Communication",
+      "keywords": "call meeting camera"
+    },
+    {
+      "name": "nf-md-atom",
+      "cp": "F0768",
+      "glyph": "󰝨",
+      "group": "AI & Science",
+      "keywords": "physics science particle"
+    },
+    {
+      "name": "nf-md-beaker",
+      "cp": "F0CEA",
+      "glyph": "󰳪",
+      "group": "AI & Science",
+      "keywords": "lab chemistry mixture"
+    },
+    {
+      "name": "nf-md-book_open_variant",
+      "cp": "F14F7",
+      "glyph": "󱓷",
+      "group": "AI & Science",
+      "keywords": "read study manual"
+    },
+    {
+      "name": "nf-md-brain",
+      "cp": "F09D1",
+      "glyph": "󰧑",
+      "group": "AI & Science",
+      "keywords": "mind think neural"
+    },
+    {
+      "name": "nf-md-calculator",
+      "cp": "F00EC",
+      "glyph": "󰃬",
+      "group": "AI & Science",
+      "keywords": "math compute arithmetic"
+    },
+    {
+      "name": "nf-md-chart_bell_curve",
+      "cp": "F0C50",
+      "glyph": "󰱐",
+      "group": "AI & Science",
+      "keywords": "statistics normal distribution"
+    },
+    {
+      "name": "nf-md-chip",
+      "cp": "F061A",
+      "glyph": "󰘚",
+      "group": "AI & Science",
+      "keywords": "processor silicon hardware"
+    },
+    {
+      "name": "nf-md-creation",
+      "cp": "F0674",
+      "glyph": "󰙴",
+      "group": "AI & Science",
+      "keywords": "spark magic new"
+    },
+    {
+      "name": "nf-md-dna",
+      "cp": "F0684",
+      "glyph": "󰚄",
+      "group": "AI & Science",
+      "keywords": "genetics biology helix"
+    },
+    {
+      "name": "nf-md-flask",
+      "cp": "F0093",
+      "glyph": "󰂓",
+      "group": "AI & Science",
+      "keywords": "lab chemistry experiment"
+    },
+    {
+      "name": "nf-md-function_variant",
+      "cp": "F0871",
+      "glyph": "󰡱",
+      "group": "AI & Science",
+      "keywords": "math formula equation"
+    },
+    {
+      "name": "nf-md-graph",
+      "cp": "F1049",
+      "glyph": "󱁉",
+      "group": "AI & Science",
+      "keywords": "nodes network topology"
+    },
+    {
+      "name": "nf-md-head_cog",
+      "cp": "F133C",
+      "glyph": "󱌼",
+      "group": "AI & Science",
+      "keywords": "thinking process mind"
+    },
+    {
+      "name": "nf-md-head_lightbulb",
+      "cp": "F1344",
+      "glyph": "󱍄",
+      "group": "AI & Science",
+      "keywords": "idea insight mind"
+    },
+    {
+      "name": "nf-md-infinity",
+      "cp": "F06E4",
+      "glyph": "󰛤",
+      "group": "AI & Science",
+      "keywords": "endless loop limitless"
+    },
+    {
+      "name": "nf-md-lightbulb_on",
+      "cp": "F06E8",
+      "glyph": "󰛨",
+      "group": "AI & Science",
+      "keywords": "idea insight bright"
+    },
+    {
+      "name": "nf-md-magnet",
+      "cp": "F0347",
+      "glyph": "󰍇",
+      "group": "AI & Science",
+      "keywords": "attract physics field"
+    },
+    {
+      "name": "nf-md-math_integral",
+      "cp": "F0FC8",
+      "glyph": "󰿈",
+      "group": "AI & Science",
+      "keywords": "calculus math area"
+    },
+    {
+      "name": "nf-md-memory",
+      "cp": "F035B",
+      "glyph": "󰍛",
+      "group": "AI & Science",
+      "keywords": "ram chip hardware"
+    },
+    {
+      "name": "nf-md-microscope",
+      "cp": "F0654",
+      "glyph": "󰙔",
+      "group": "AI & Science",
+      "keywords": "biology lab research"
+    },
+    {
+      "name": "nf-md-molecule",
+      "cp": "F0BAC",
+      "glyph": "󰮬",
+      "group": "AI & Science",
+      "keywords": "chemistry compound bond"
+    },
+    {
+      "name": "nf-md-orbit",
+      "cp": "F0018",
+      "glyph": "󰀘",
+      "group": "AI & Science",
+      "keywords": "revolve path circle"
+    },
+    {
+      "name": "nf-md-pi",
+      "cp": "F03FF",
+      "glyph": "󰏿",
+      "group": "AI & Science",
+      "keywords": "math constant circle"
+    },
+    {
+      "name": "nf-md-radioactive",
+      "cp": "F043C",
+      "glyph": "󰐼",
+      "group": "AI & Science",
+      "keywords": "nuclear hazard atomic"
+    },
+    {
+      "name": "nf-md-robot",
+      "cp": "F06A9",
+      "glyph": "󰚩",
+      "group": "AI & Science",
+      "keywords": "bot android automation"
+    },
+    {
+      "name": "nf-md-rocket",
+      "cp": "F0463",
+      "glyph": "󰑣",
+      "group": "AI & Science",
+      "keywords": "launch space startup"
+    },
+    {
+      "name": "nf-md-rocket_launch",
+      "cp": "F14DE",
+      "glyph": "󱓞",
+      "group": "AI & Science",
+      "keywords": "deploy space startup"
+    },
+    {
+      "name": "nf-md-satellite_variant",
+      "cp": "F0471",
+      "glyph": "󰑱",
+      "group": "AI & Science",
+      "keywords": "orbit space signal"
+    },
+    {
+      "name": "nf-md-scale_balance",
+      "cp": "F05D1",
+      "glyph": "󰗑",
+      "group": "AI & Science",
+      "keywords": "weigh justice compare"
+    },
+    {
+      "name": "nf-md-school",
+      "cp": "F0474",
+      "glyph": "󰑴",
+      "group": "AI & Science",
+      "keywords": "learn study education"
+    },
+    {
+      "name": "nf-md-sigma",
+      "cp": "F04A0",
+      "glyph": "󰒠",
+      "group": "AI & Science",
+      "keywords": "sum math series"
+    },
+    {
+      "name": "nf-md-telescope",
+      "cp": "F0B4E",
+      "glyph": "󰭎",
+      "group": "AI & Science",
+      "keywords": "astronomy observe stars"
+    },
+    {
+      "name": "nf-md-thermometer",
+      "cp": "F050F",
+      "glyph": "󰔏",
+      "group": "AI & Science",
+      "keywords": "temperature heat measure"
+    },
+    {
+      "name": "nf-md-vector_triangle",
+      "cp": "F0563",
+      "glyph": "󰕣",
+      "group": "AI & Science",
+      "keywords": "geometry mesh polygon"
+    },
+    {
+      "name": "nf-md-animation",
+      "cp": "F05D8",
+      "glyph": "󰗘",
+      "group": "Media",
+      "keywords": "motion frames tween"
+    },
+    {
+      "name": "nf-md-brush",
+      "cp": "F00E3",
+      "glyph": "󰃣",
+      "group": "Media",
+      "keywords": "paint art draw"
+    },
+    {
+      "name": "nf-md-camera",
+      "cp": "F0100",
+      "glyph": "󰄀",
+      "group": "Media",
+      "keywords": "photo capture lens"
+    },
+    {
+      "name": "nf-md-controller_classic",
+      "cp": "F0B82",
+      "glyph": "󰮂",
+      "group": "Media",
+      "keywords": "game retro joypad"
+    },
+    {
+      "name": "nf-md-drawing",
+      "cp": "F01DE",
+      "glyph": "󰇞",
+      "group": "Media",
+      "keywords": "sketch art vector"
+    },
+    {
+      "name": "nf-md-format_paint",
+      "cp": "F027C",
+      "glyph": "󰉼",
+      "group": "Media",
+      "keywords": "fill color style"
+    },
+    {
+      "name": "nf-md-gamepad_variant",
+      "cp": "F0297",
+      "glyph": "󰊗",
+      "group": "Media",
+      "keywords": "game controller play"
+    },
+    {
+      "name": "nf-md-guitar_electric",
+      "cp": "F02C4",
+      "glyph": "󰋄",
+      "group": "Media",
+      "keywords": "instrument rock strings"
+    },
+    {
+      "name": "nf-md-headphones",
+      "cp": "F02CB",
+      "glyph": "󰋋",
+      "group": "Media",
+      "keywords": "listen audio ears"
+    },
+    {
+      "name": "nf-md-image",
+      "cp": "F02E9",
+      "glyph": "󰋩",
+      "group": "Media",
+      "keywords": "picture photo graphic"
+    },
+    {
+      "name": "nf-md-image_multiple",
+      "cp": "F02F9",
+      "glyph": "󰋹",
+      "group": "Media",
+      "keywords": "gallery photos album"
+    },
+    {
+      "name": "nf-md-microphone",
+      "cp": "F036C",
+      "glyph": "󰍬",
+      "group": "Media",
+      "keywords": "record voice input"
+    },
+    {
+      "name": "nf-md-microphone_off",
+      "cp": "F036D",
+      "glyph": "󰍭",
+      "group": "Media",
+      "keywords": "mute record voice"
+    },
+    {
+      "name": "nf-md-movie",
+      "cp": "F0381",
+      "glyph": "󰎁",
+      "group": "Media",
+      "keywords": "film cinema video"
+    },
+    {
+      "name": "nf-md-music",
+      "cp": "F075A",
+      "glyph": "󰝚",
+      "group": "Media",
+      "keywords": "song audio note"
+    },
+    {
+      "name": "nf-md-netflix",
+      "cp": "F0746",
+      "glyph": "󰝆",
+      "group": "Media",
+      "keywords": "streaming series film"
+    },
+    {
+      "name": "nf-md-palette",
+      "cp": "F03D8",
+      "glyph": "󰏘",
+      "group": "Media",
+      "keywords": "color paint art"
+    },
+    {
+      "name": "nf-md-pause",
+      "cp": "F03E4",
+      "glyph": "󰏤",
+      "group": "Media",
+      "keywords": "halt suspend media"
+    },
+    {
+      "name": "nf-md-piano",
+      "cp": "F067D",
+      "glyph": "󰙽",
+      "group": "Media",
+      "keywords": "keys instrument music"
+    },
+    {
+      "name": "nf-md-play",
+      "cp": "F040A",
+      "glyph": "󰐊",
+      "group": "Media",
+      "keywords": "start run media"
+    },
+    {
+      "name": "nf-md-playlist_music",
+      "cp": "F0CB8",
+      "glyph": "󰲸",
+      "group": "Media",
+      "keywords": "queue tracks list"
+    },
+    {
+      "name": "nf-md-podcast",
+      "cp": "F0994",
+      "glyph": "󰦔",
+      "group": "Media",
+      "keywords": "audio show episode"
+    },
+    {
+      "name": "nf-md-projector_screen",
+      "cp": "F042F",
+      "glyph": "󰐯",
+      "group": "Media",
+      "keywords": "present slides display"
+    },
+    {
+      "name": "nf-md-radio",
+      "cp": "F0439",
+      "glyph": "󰐹",
+      "group": "Media",
+      "keywords": "broadcast fm tuner"
+    },
+    {
+      "name": "nf-md-record_circle",
+      "cp": "F0EC2",
+      "glyph": "󰻂",
+      "group": "Media",
+      "keywords": "capture rec button"
+    },
+    {
+      "name": "nf-md-skip_next",
+      "cp": "F04AD",
+      "glyph": "󰒭",
+      "group": "Media",
+      "keywords": "forward track advance"
+    },
+    {
+      "name": "nf-md-skip_previous",
+      "cp": "F04AE",
+      "glyph": "󰒮",
+      "group": "Media",
+      "keywords": "back track rewind"
+    },
+    {
+      "name": "nf-md-spotify",
+      "cp": "F04C7",
+      "glyph": "󰓇",
+      "group": "Media",
+      "keywords": "streaming music playlist"
+    },
+    {
+      "name": "nf-md-stop",
+      "cp": "F04DB",
+      "glyph": "󰓛",
+      "group": "Media",
+      "keywords": "end halt media"
+    },
+    {
+      "name": "nf-md-television",
+      "cp": "F0502",
+      "glyph": "󰔂",
+      "group": "Media",
+      "keywords": "tv screen broadcast"
+    },
+    {
+      "name": "nf-md-video_vintage",
+      "cp": "F0A1C",
+      "glyph": "󰨜",
+      "group": "Media",
+      "keywords": "retro film camera"
+    },
+    {
+      "name": "nf-md-volume_high",
+      "cp": "F057E",
+      "glyph": "󰕾",
+      "group": "Media",
+      "keywords": "sound loud audio"
+    },
+    {
+      "name": "nf-md-volume_off",
+      "cp": "F0581",
+      "glyph": "󰖁",
+      "group": "Media",
+      "keywords": "mute silent audio"
+    },
+    {
+      "name": "nf-md-youtube",
+      "cp": "F05C3",
+      "glyph": "󰗃",
+      "group": "Media",
+      "keywords": "video streaming channel"
+    },
+    {
+      "name": "nf-md-archive",
+      "cp": "F003C",
+      "glyph": "󰀼",
+      "group": "Files & Documents",
+      "keywords": "store box history"
+    },
+    {
+      "name": "nf-md-book",
+      "cp": "F00BA",
+      "glyph": "󰂺",
+      "group": "Files & Documents",
+      "keywords": "read volume manual"
+    },
+    {
+      "name": "nf-md-book_open_page_variant",
+      "cp": "F05DA",
+      "glyph": "󰗚",
+      "group": "Files & Documents",
+      "keywords": "read manual chapter"
+    },
+    {
+      "name": "nf-md-bookshelf",
+      "cp": "F125F",
+      "glyph": "󱉟",
+      "group": "Files & Documents",
+      "keywords": "books shelf storage"
+    },
+    {
+      "name": "nf-md-content_copy",
+      "cp": "F018F",
+      "glyph": "󰆏",
+      "group": "Files & Documents",
+      "keywords": "duplicate clone paste"
+    },
+    {
+      "name": "nf-md-content_save",
+      "cp": "F0193",
+      "glyph": "󰆓",
+      "group": "Files & Documents",
+      "keywords": "disk store write"
+    },
+    {
+      "name": "nf-md-download",
+      "cp": "F01DA",
+      "glyph": "󰇚",
+      "group": "Files & Documents",
+      "keywords": "save fetch get"
+    },
+    {
+      "name": "nf-md-file",
+      "cp": "F0214",
+      "glyph": "󰈔",
+      "group": "Files & Documents",
+      "keywords": "document sheet blank"
+    },
+    {
+      "name": "nf-md-file_code",
+      "cp": "F022E",
+      "glyph": "󰈮",
+      "group": "Files & Documents",
+      "keywords": "source script program"
+    },
+    {
+      "name": "nf-md-file_document",
+      "cp": "F0219",
+      "glyph": "󰈙",
+      "group": "Files & Documents",
+      "keywords": "paper text doc"
+    },
+    {
+      "name": "nf-md-file_edit",
+      "cp": "F11E7",
+      "glyph": "󱇧",
+      "group": "Files & Documents",
+      "keywords": "modify change document"
+    },
+    {
+      "name": "nf-md-file_excel",
+      "cp": "F021B",
+      "glyph": "󰈛",
+      "group": "Files & Documents",
+      "keywords": "spreadsheet sheet table"
+    },
+    {
+      "name": "nf-md-file_find",
+      "cp": "F021E",
+      "glyph": "󰈞",
+      "group": "Files & Documents",
+      "keywords": "search locate document"
+    },
+    {
+      "name": "nf-md-file_image",
+      "cp": "F021F",
+      "glyph": "󰈟",
+      "group": "Files & Documents",
+      "keywords": "picture photo graphic"
+    },
+    {
+      "name": "nf-md-file_lock",
+      "cp": "F0221",
+      "glyph": "󰈡",
+      "group": "Files & Documents",
+      "keywords": "secure private document"
+    },
+    {
+      "name": "nf-md-file_music",
+      "cp": "F0223",
+      "glyph": "󰈣",
+      "group": "Files & Documents",
+      "keywords": "audio track sound"
+    },
+    {
+      "name": "nf-md-file_pdf_box",
+      "cp": "F0226",
+      "glyph": "󰈦",
+      "group": "Files & Documents",
+      "keywords": "portable document acrobat"
+    },
+    {
+      "name": "nf-md-file_plus",
+      "cp": "F0752",
+      "glyph": "󰝒",
+      "group": "Files & Documents",
+      "keywords": "new create document"
+    },
+    {
+      "name": "nf-md-file_remove",
+      "cp": "F0B98",
+      "glyph": "󰮘",
+      "group": "Files & Documents",
+      "keywords": "delete drop document"
+    },
+    {
+      "name": "nf-md-file_video",
+      "cp": "F022B",
+      "glyph": "󰈫",
+      "group": "Files & Documents",
+      "keywords": "movie clip footage"
+    },
+    {
+      "name": "nf-md-file_word",
+      "cp": "F022C",
+      "glyph": "󰈬",
+      "group": "Files & Documents",
+      "keywords": "document text writer"
+    },
+    {
+      "name": "nf-md-folder",
+      "cp": "F024B",
+      "glyph": "󰉋",
+      "group": "Files & Documents",
+      "keywords": "directory dir container"
+    },
+    {
+      "name": "nf-md-folder_multiple",
+      "cp": "F0253",
+      "glyph": "󰉓",
+      "group": "Files & Documents",
+      "keywords": "directories dirs group"
+    },
+    {
+      "name": "nf-md-folder_open",
+      "cp": "F0770",
+      "glyph": "󰝰",
+      "group": "Files & Documents",
+      "keywords": "directory browse expanded"
+    },
+    {
+      "name": "nf-md-format_list_bulleted",
+      "cp": "F0279",
+      "glyph": "󰉹",
+      "group": "Files & Documents",
+      "keywords": "items points list"
+    },
+    {
+      "name": "nf-md-language_markdown",
+      "cp": "F0354",
+      "glyph": "󰍔",
+      "group": "Files & Documents",
+      "keywords": "md text format"
+    },
+    {
+      "name": "nf-md-library",
+      "cp": "F0331",
+      "glyph": "󰌱",
+      "group": "Files & Documents",
+      "keywords": "books collection shelf"
+    },
+    {
+      "name": "nf-md-newspaper",
+      "cp": "F0395",
+      "glyph": "󰎕",
+      "group": "Files & Documents",
+      "keywords": "news article press"
+    },
+    {
+      "name": "nf-md-paperclip",
+      "cp": "F03E2",
+      "glyph": "󰏢",
+      "group": "Files & Documents",
+      "keywords": "attachment clip attach"
+    },
+    {
+      "name": "nf-md-printer",
+      "cp": "F042A",
+      "glyph": "󰐪",
+      "group": "Files & Documents",
+      "keywords": "print paper output"
+    },
+    {
+      "name": "nf-md-scanner",
+      "cp": "F06AB",
+      "glyph": "󰚫",
+      "group": "Files & Documents",
+      "keywords": "digitize scan input"
+    },
+    {
+      "name": "nf-md-table",
+      "cp": "F04EB",
+      "glyph": "󰓫",
+      "group": "Files & Documents",
+      "keywords": "grid rows columns"
+    },
+    {
+      "name": "nf-md-tag",
+      "cp": "F04F9",
+      "glyph": "󰓹",
+      "group": "Files & Documents",
+      "keywords": "label mark category"
+    },
+    {
+      "name": "nf-md-tag_multiple",
+      "cp": "F04FB",
+      "glyph": "󰓻",
+      "group": "Files & Documents",
+      "keywords": "labels marks categories"
+    },
+    {
+      "name": "nf-md-text_box",
+      "cp": "F021A",
+      "glyph": "󰈚",
+      "group": "Files & Documents",
+      "keywords": "paragraph content note"
+    },
+    {
+      "name": "nf-md-trash_can",
+      "cp": "F0A79",
+      "glyph": "󰩹",
+      "group": "Files & Documents",
+      "keywords": "delete bin remove"
+    },
+    {
+      "name": "nf-md-upload",
+      "cp": "F0552",
+      "glyph": "󰕒",
+      "group": "Files & Documents",
+      "keywords": "send push put"
+    },
+    {
+      "name": "nf-md-zip_box",
+      "cp": "F05C4",
+      "glyph": "󰗄",
+      "group": "Files & Documents",
+      "keywords": "archive compress bundle"
+    },
+    {
+      "name": "nf-linux-archlinux",
+      "cp": "F303",
+      "glyph": "",
+      "group": "System & Devices",
+      "keywords": "arch pacman distro"
+    },
+    {
+      "name": "nf-md-android",
+      "cp": "F0032",
+      "glyph": "󰀲",
+      "group": "System & Devices",
+      "keywords": "mobile os google"
+    },
+    {
+      "name": "nf-md-apple",
+      "cp": "F0035",
+      "glyph": "󰀵",
+      "group": "System & Devices",
+      "keywords": "macos osx mac"
+    },
+    {
+      "name": "nf-md-battery",
+      "cp": "F0079",
+      "glyph": "󰁹",
+      "group": "System & Devices",
+      "keywords": "power charge cell"
+    },
+    {
+      "name": "nf-md-battery_charging",
+      "cp": "F0084",
+      "glyph": "󰂄",
+      "group": "System & Devices",
+      "keywords": "power charge plugged"
+    },
+    {
+      "name": "nf-md-bluetooth",
+      "cp": "F00AF",
+      "glyph": "󰂯",
+      "group": "System & Devices",
+      "keywords": "wireless pair device"
+    },
+    {
+      "name": "nf-md-cellphone",
+      "cp": "F011C",
+      "glyph": "󰄜",
+      "group": "System & Devices",
+      "keywords": "mobile phone handset"
+    },
+    {
+      "name": "nf-md-cpu_64_bit",
+      "cp": "F0EE0",
+      "glyph": "󰻠",
+      "group": "System & Devices",
+      "keywords": "processor chip core"
+    },
+    {
+      "name": "nf-md-debian",
+      "cp": "F08DA",
+      "glyph": "󰣚",
+      "group": "System & Devices",
+      "keywords": "distro apt gnu"
+    },
+    {
+      "name": "nf-md-desktop_tower_monitor",
+      "cp": "F0AAB",
+      "glyph": "󰪫",
+      "group": "System & Devices",
+      "keywords": "pc workstation computer"
+    },
+    {
+      "name": "nf-md-expansion_card",
+      "cp": "F08AE",
+      "glyph": "󰢮",
+      "group": "System & Devices",
+      "keywords": "gpu pcie hardware"
+    },
+    {
+      "name": "nf-md-fan",
+      "cp": "F0210",
+      "glyph": "󰈐",
+      "group": "System & Devices",
+      "keywords": "cooling airflow ventilation"
+    },
+    {
+      "name": "nf-md-fedora",
+      "cp": "F08DB",
+      "glyph": "󰣛",
+      "group": "System & Devices",
+      "keywords": "redhat distro rpm"
+    },
+    {
+      "name": "nf-md-fingerprint",
+      "cp": "F0237",
+      "glyph": "󰈷",
+      "group": "System & Devices",
+      "keywords": "biometric auth identity"
+    },
+    {
+      "name": "nf-md-hammer_screwdriver",
+      "cp": "F1322",
+      "glyph": "󱌢",
+      "group": "System & Devices",
+      "keywords": "tools fix build"
+    },
+    {
+      "name": "nf-md-keyboard",
+      "cp": "F030C",
+      "glyph": "󰌌",
+      "group": "System & Devices",
+      "keywords": "typing input keys"
+    },
+    {
+      "name": "nf-md-laptop",
+      "cp": "F0322",
+      "glyph": "󰌢",
+      "group": "System & Devices",
+      "keywords": "notebook computer portable"
+    },
+    {
+      "name": "nf-md-linux",
+      "cp": "F033D",
+      "glyph": "󰌽",
+      "group": "System & Devices",
+      "keywords": "kernel penguin unix"
+    },
+    {
+      "name": "nf-md-lock",
+      "cp": "F033E",
+      "glyph": "󰌾",
+      "group": "System & Devices",
+      "keywords": "secure closed protect"
+    },
+    {
+      "name": "nf-md-lock_open_variant",
+      "cp": "F0FC6",
+      "glyph": "󰿆",
+      "group": "System & Devices",
+      "keywords": "unsecure open access"
+    },
+    {
+      "name": "nf-md-microsoft_windows",
+      "cp": "F05B3",
+      "glyph": "󰖳",
+      "group": "System & Devices",
+      "keywords": "win os microsoft"
+    },
+    {
+      "name": "nf-md-monitor",
+      "cp": "F0379",
+      "glyph": "󰍹",
+      "group": "System & Devices",
+      "keywords": "screen display crt"
+    },
+    {
+      "name": "nf-md-monitor_multiple",
+      "cp": "F037A",
+      "glyph": "󰍺",
+      "group": "System & Devices",
+      "keywords": "screens displays dual"
+    },
+    {
+      "name": "nf-md-mouse",
+      "cp": "F037D",
+      "glyph": "󰍽",
+      "group": "System & Devices",
+      "keywords": "pointer input cursor"
+    },
+    {
+      "name": "nf-md-power",
+      "cp": "F0425",
+      "glyph": "󰐥",
+      "group": "System & Devices",
+      "keywords": "on off toggle"
+    },
+    {
+      "name": "nf-md-power_settings",
+      "cp": "F0426",
+      "glyph": "󰐦",
+      "group": "System & Devices",
+      "keywords": "shutdown reboot toggle"
+    },
+    {
+      "name": "nf-md-raspberry_pi",
+      "cp": "F043F",
+      "glyph": "󰐿",
+      "group": "System & Devices",
+      "keywords": "sbc board maker"
+    },
+    {
+      "name": "nf-md-restart",
+      "cp": "F0709",
+      "glyph": "󰜉",
+      "group": "System & Devices",
+      "keywords": "reboot reload cycle"
+    },
+    {
+      "name": "nf-md-sd",
+      "cp": "F0479",
+      "glyph": "󰑹",
+      "group": "System & Devices",
+      "keywords": "card storage memory"
+    },
+    {
+      "name": "nf-md-shield_check",
+      "cp": "F0565",
+      "glyph": "󰕥",
+      "group": "System & Devices",
+      "keywords": "secure verified guard"
+    },
+    {
+      "name": "nf-md-signal_cellular_3",
+      "cp": "F08BE",
+      "glyph": "󰢾",
+      "group": "System & Devices",
+      "keywords": "reception mobile bars"
+    },
+    {
+      "name": "nf-md-tablet",
+      "cp": "F04F6",
+      "glyph": "󰓶",
+      "group": "System & Devices",
+      "keywords": "pad slate device"
+    },
+    {
+      "name": "nf-md-thermometer_lines",
+      "cp": "F0510",
+      "glyph": "󰔐",
+      "group": "System & Devices",
+      "keywords": "temperature sensor heat"
+    },
+    {
+      "name": "nf-md-tools",
+      "cp": "F1064",
+      "glyph": "󱁤",
+      "group": "System & Devices",
+      "keywords": "toolbox fix build"
+    },
+    {
+      "name": "nf-md-ubuntu",
+      "cp": "F0548",
+      "glyph": "󰕈",
+      "group": "System & Devices",
+      "keywords": "canonical distro debian"
+    },
+    {
+      "name": "nf-md-update",
+      "cp": "F06B0",
+      "glyph": "󰚰",
+      "group": "System & Devices",
+      "keywords": "upgrade refresh patch"
+    },
+    {
+      "name": "nf-md-usb",
+      "cp": "F0553",
+      "glyph": "󰕓",
+      "group": "System & Devices",
+      "keywords": "port connector drive"
+    },
+    {
+      "name": "nf-md-usb_flash_drive",
+      "cp": "F129E",
+      "glyph": "󱊞",
+      "group": "System & Devices",
+      "keywords": "stick storage portable"
+    },
+    {
+      "name": "nf-md-watch",
+      "cp": "F0589",
+      "glyph": "󰖉",
+      "group": "System & Devices",
+      "keywords": "wearable smartwatch wrist"
+    },
+    {
+      "name": "nf-md-wifi",
+      "cp": "F05A9",
+      "glyph": "󰖩",
+      "group": "System & Devices",
+      "keywords": "wireless signal network"
+    },
+    {
+      "name": "nf-md-wrench",
+      "cp": "F05B7",
+      "glyph": "󰖷",
+      "group": "System & Devices",
+      "keywords": "tool fix repair"
+    },
+    {
+      "name": "nf-md-arrow_down",
+      "cp": "F0045",
+      "glyph": "󰁅",
+      "group": "Numbers & Shapes",
+      "keywords": "south down direction"
+    },
+    {
+      "name": "nf-md-arrow_left",
+      "cp": "F004D",
+      "glyph": "󰁍",
+      "group": "Numbers & Shapes",
+      "keywords": "west back direction"
+    },
+    {
+      "name": "nf-md-arrow_right",
+      "cp": "F0054",
+      "glyph": "󰁔",
+      "group": "Numbers & Shapes",
+      "keywords": "east next direction"
+    },
+    {
+      "name": "nf-md-arrow_up",
+      "cp": "F005D",
+      "glyph": "󰁝",
+      "group": "Numbers & Shapes",
+      "keywords": "north up direction"
+    },
+    {
+      "name": "nf-md-cards_diamond",
+      "cp": "F08CF",
+      "glyph": "󰣏",
+      "group": "Numbers & Shapes",
+      "keywords": "suit card gem"
+    },
+    {
+      "name": "nf-md-check",
+      "cp": "F012C",
+      "glyph": "󰄬",
+      "group": "Numbers & Shapes",
+      "keywords": "done tick confirm"
+    },
+    {
+      "name": "nf-md-chevron_left",
+      "cp": "F0141",
+      "glyph": "󰅁",
+      "group": "Numbers & Shapes",
+      "keywords": "arrow back previous"
+    },
+    {
+      "name": "nf-md-chevron_right",
+      "cp": "F0142",
+      "glyph": "󰅂",
+      "group": "Numbers & Shapes",
+      "keywords": "arrow next forward"
+    },
+    {
+      "name": "nf-md-circle",
+      "cp": "F0765",
+      "glyph": "󰝥",
+      "group": "Numbers & Shapes",
+      "keywords": "round dot filled"
+    },
+    {
+      "name": "nf-md-circle_outline",
+      "cp": "F0766",
+      "glyph": "󰝦",
+      "group": "Numbers & Shapes",
+      "keywords": "round ring hollow"
+    },
+    {
+      "name": "nf-md-close",
+      "cp": "F0156",
+      "glyph": "󰅖",
+      "group": "Numbers & Shapes",
+      "keywords": "cancel exit times"
+    },
+    {
+      "name": "nf-md-diamond_stone",
+      "cp": "F01C8",
+      "glyph": "󰇈",
+      "group": "Numbers & Shapes",
+      "keywords": "gem jewel precious"
+    },
+    {
+      "name": "nf-md-dots_horizontal",
+      "cp": "F01D8",
+      "glyph": "󰇘",
+      "group": "Numbers & Shapes",
+      "keywords": "more menu ellipsis"
+    },
+    {
+      "name": "nf-md-dots_vertical",
+      "cp": "F01D9",
+      "glyph": "󰇙",
+      "group": "Numbers & Shapes",
+      "keywords": "more menu kebab"
+    },
+    {
+      "name": "nf-md-grid",
+      "cp": "F02C1",
+      "glyph": "󰋁",
+      "group": "Numbers & Shapes",
+      "keywords": "layout matrix cells"
+    },
+    {
+      "name": "nf-md-heart",
+      "cp": "F02D1",
+      "glyph": "󰋑",
+      "group": "Numbers & Shapes",
+      "keywords": "love favourite filled"
+    },
+    {
+      "name": "nf-md-heart_outline",
+      "cp": "F02D5",
+      "glyph": "󰋕",
+      "group": "Numbers & Shapes",
+      "keywords": "love favourite hollow"
+    },
+    {
+      "name": "nf-md-hexagon",
+      "cp": "F02D8",
+      "glyph": "󰋘",
+      "group": "Numbers & Shapes",
+      "keywords": "six sided shape"
+    },
+    {
+      "name": "nf-md-hexagon_outline",
+      "cp": "F02D9",
+      "glyph": "󰋙",
+      "group": "Numbers & Shapes",
+      "keywords": "six sided hollow"
+    },
+    {
+      "name": "nf-md-menu",
+      "cp": "F035C",
+      "glyph": "󰍜",
+      "group": "Numbers & Shapes",
+      "keywords": "hamburger nav list"
+    },
+    {
+      "name": "nf-md-minus",
+      "cp": "F0374",
+      "glyph": "󰍴",
+      "group": "Numbers & Shapes",
+      "keywords": "remove subtract decrement"
+    },
+    {
+      "name": "nf-md-numeric_0_box",
+      "cp": "F03A1",
+      "glyph": "󰎡",
+      "group": "Numbers & Shapes",
+      "keywords": "zero digit number"
+    },
+    {
+      "name": "nf-md-numeric_1_box",
+      "cp": "F03A4",
+      "glyph": "󰎤",
+      "group": "Numbers & Shapes",
+      "keywords": "one digit number"
+    },
+    {
+      "name": "nf-md-numeric_2_box",
+      "cp": "F03A7",
+      "glyph": "󰎧",
+      "group": "Numbers & Shapes",
+      "keywords": "two digit number"
+    },
+    {
+      "name": "nf-md-numeric_3_box",
+      "cp": "F03AA",
+      "glyph": "󰎪",
+      "group": "Numbers & Shapes",
+      "keywords": "three digit number"
+    },
+    {
+      "name": "nf-md-numeric_4_box",
+      "cp": "F03AD",
+      "glyph": "󰎭",
+      "group": "Numbers & Shapes",
+      "keywords": "four digit number"
+    },
+    {
+      "name": "nf-md-numeric_5_box",
+      "cp": "F03B1",
+      "glyph": "󰎱",
+      "group": "Numbers & Shapes",
+      "keywords": "five digit number"
+    },
+    {
+      "name": "nf-md-numeric_6_box",
+      "cp": "F03B3",
+      "glyph": "󰎳",
+      "group": "Numbers & Shapes",
+      "keywords": "six digit number"
+    },
+    {
+      "name": "nf-md-numeric_7_box",
+      "cp": "F03B6",
+      "glyph": "󰎶",
+      "group": "Numbers & Shapes",
+      "keywords": "seven digit number"
+    },
+    {
+      "name": "nf-md-numeric_8_box",
+      "cp": "F03B9",
+      "glyph": "󰎹",
+      "group": "Numbers & Shapes",
+      "keywords": "eight digit number"
+    },
+    {
+      "name": "nf-md-numeric_9_box",
+      "cp": "F03BC",
+      "glyph": "󰎼",
+      "group": "Numbers & Shapes",
+      "keywords": "nine digit number"
+    },
+    {
+      "name": "nf-md-plus",
+      "cp": "F0415",
+      "glyph": "󰐕",
+      "group": "Numbers & Shapes",
+      "keywords": "add new increment"
+    },
+    {
+      "name": "nf-md-rhombus",
+      "cp": "F070B",
+      "glyph": "󰜋",
+      "group": "Numbers & Shapes",
+      "keywords": "diamond shape filled"
+    },
+    {
+      "name": "nf-md-roman_numeral_1",
+      "cp": "F1088",
+      "glyph": "󱂈",
+      "group": "Numbers & Shapes",
+      "keywords": "one latin number"
+    },
+    {
+      "name": "nf-md-shape",
+      "cp": "F0831",
+      "glyph": "󰠱",
+      "group": "Numbers & Shapes",
+      "keywords": "geometry forms figures"
+    },
+    {
+      "name": "nf-md-square",
+      "cp": "F0764",
+      "glyph": "󰝤",
+      "group": "Numbers & Shapes",
+      "keywords": "box quad filled"
+    },
+    {
+      "name": "nf-md-square_outline",
+      "cp": "F0763",
+      "glyph": "󰝣",
+      "group": "Numbers & Shapes",
+      "keywords": "box quad hollow"
+    },
+    {
+      "name": "nf-md-star",
+      "cp": "F04CE",
+      "glyph": "󰓎",
+      "group": "Numbers & Shapes",
+      "keywords": "favourite rating filled"
+    },
+    {
+      "name": "nf-md-star_outline",
+      "cp": "F04D2",
+      "glyph": "󰓒",
+      "group": "Numbers & Shapes",
+      "keywords": "favourite rating hollow"
+    },
+    {
+      "name": "nf-md-triangle",
+      "cp": "F0536",
+      "glyph": "󰔶",
+      "group": "Numbers & Shapes",
+      "keywords": "delta shape filled"
+    },
+    {
+      "name": "nf-md-triangle_outline",
+      "cp": "F0537",
+      "glyph": "󰔷",
+      "group": "Numbers & Shapes",
+      "keywords": "delta shape hollow"
+    },
+    {
+      "name": "nf-md-airplane",
+      "cp": "F001D",
+      "glyph": "󰀝",
+      "group": "Nature & Misc",
+      "keywords": "flight travel plane"
+    },
+    {
+      "name": "nf-md-alien",
+      "cp": "F089A",
+      "glyph": "󰢚",
+      "group": "Nature & Misc",
+      "keywords": "ufo extraterrestrial space"
+    },
+    {
+      "name": "nf-md-bee",
+      "cp": "F0FA1",
+      "glyph": "󰾡",
+      "group": "Nature & Misc",
+      "keywords": "insect honey pollinate"
+    },
+    {
+      "name": "nf-md-beer",
+      "cp": "F0098",
+      "glyph": "󰂘",
+      "group": "Nature & Misc",
+      "keywords": "pint pub drink"
+    },
+    {
+      "name": "nf-md-bicycle",
+      "cp": "F109C",
+      "glyph": "󱂜",
+      "group": "Nature & Misc",
+      "keywords": "cycle ride transport"
+    },
+    {
+      "name": "nf-md-bird",
+      "cp": "F15C6",
+      "glyph": "󱗆",
+      "group": "Nature & Misc",
+      "keywords": "avian wings animal"
+    },
+    {
+      "name": "nf-md-butterfly",
+      "cp": "F1589",
+      "glyph": "󱖉",
+      "group": "Nature & Misc",
+      "keywords": "insect wings metamorphosis"
+    },
+    {
+      "name": "nf-md-cactus",
+      "cp": "F0DB5",
+      "glyph": "󰶵",
+      "group": "Nature & Misc",
+      "keywords": "desert succulent plant"
+    },
+    {
+      "name": "nf-md-cake_variant",
+      "cp": "F00EB",
+      "glyph": "󰃫",
+      "group": "Nature & Misc",
+      "keywords": "birthday dessert party"
+    },
+    {
+      "name": "nf-md-car",
+      "cp": "F010B",
+      "glyph": "󰄋",
+      "group": "Nature & Misc",
+      "keywords": "auto drive transport"
+    },
+    {
+      "name": "nf-md-cat",
+      "cp": "F011B",
+      "glyph": "󰄛",
+      "group": "Nature & Misc",
+      "keywords": "pet feline animal"
+    },
+    {
+      "name": "nf-md-coffee",
+      "cp": "F0176",
+      "glyph": "󰅶",
+      "group": "Nature & Misc",
+      "keywords": "cup caffeine drink"
+    },
+    {
+      "name": "nf-md-dog",
+      "cp": "F0A43",
+      "glyph": "󰩃",
+      "group": "Nature & Misc",
+      "keywords": "pet canine animal"
+    },
+    {
+      "name": "nf-md-emoticon_happy",
+      "cp": "F0C71",
+      "glyph": "󰱱",
+      "group": "Nature & Misc",
+      "keywords": "smile face emoji"
+    },
+    {
+      "name": "nf-md-fire",
+      "cp": "F0238",
+      "glyph": "󰈸",
+      "group": "Nature & Misc",
+      "keywords": "flame burn hot"
+    },
+    {
+      "name": "nf-md-fish",
+      "cp": "F023A",
+      "glyph": "󰈺",
+      "group": "Nature & Misc",
+      "keywords": "aquatic sea animal"
+    },
+    {
+      "name": "nf-md-flower",
+      "cp": "F024A",
+      "glyph": "󰉊",
+      "group": "Nature & Misc",
+      "keywords": "bloom petal garden"
+    },
+    {
+      "name": "nf-md-food",
+      "cp": "F025A",
+      "glyph": "󰉚",
+      "group": "Nature & Misc",
+      "keywords": "meal eat dish"
+    },
+    {
+      "name": "nf-md-ghost",
+      "cp": "F02A0",
+      "glyph": "󰊠",
+      "group": "Nature & Misc",
+      "keywords": "spooky spirit halloween"
+    },
+    {
+      "name": "nf-md-gift",
+      "cp": "F0E44",
+      "glyph": "󰹄",
+      "group": "Nature & Misc",
+      "keywords": "present box surprise"
+    },
+    {
+      "name": "nf-md-home",
+      "cp": "F02DC",
+      "glyph": "󰋜",
+      "group": "Nature & Misc",
+      "keywords": "house dwelling main"
+    },
+    {
+      "name": "nf-md-island",
+      "cp": "F104F",
+      "glyph": "󱁏",
+      "group": "Nature & Misc",
+      "keywords": "beach tropical sea"
+    },
+    {
+      "name": "nf-md-leaf",
+      "cp": "F032A",
+      "glyph": "󰌪",
+      "group": "Nature & Misc",
+      "keywords": "plant green nature"
+    },
+    {
+      "name": "nf-md-map",
+      "cp": "F034D",
+      "glyph": "󰍍",
+      "group": "Nature & Misc",
+      "keywords": "atlas navigation chart"
+    },
+    {
+      "name": "nf-md-map_marker",
+      "cp": "F034E",
+      "glyph": "󰍎",
+      "group": "Nature & Misc",
+      "keywords": "location pin place"
+    },
+    {
+      "name": "nf-md-medal",
+      "cp": "F0987",
+      "glyph": "󰦇",
+      "group": "Nature & Misc",
+      "keywords": "award honour prize"
+    },
+    {
+      "name": "nf-md-mushroom",
+      "cp": "F07DF",
+      "glyph": "󰟟",
+      "group": "Nature & Misc",
+      "keywords": "fungus forage forest"
+    },
+    {
+      "name": "nf-md-paw",
+      "cp": "F03E9",
+      "glyph": "󰏩",
+      "group": "Nature & Misc",
+      "keywords": "animal print pet"
+    },
+    {
+      "name": "nf-md-penguin",
+      "cp": "F0EC0",
+      "glyph": "󰻀",
+      "group": "Nature & Misc",
+      "keywords": "bird antarctic animal"
+    },
+    {
+      "name": "nf-md-pine_tree",
+      "cp": "F0405",
+      "glyph": "󰐅",
+      "group": "Nature & Misc",
+      "keywords": "conifer forest evergreen"
+    },
+    {
+      "name": "nf-md-pizza",
+      "cp": "F0409",
+      "glyph": "󰐉",
+      "group": "Nature & Misc",
+      "keywords": "food slice italian"
+    },
+    {
+      "name": "nf-md-snowflake",
+      "cp": "F0717",
+      "glyph": "󰜗",
+      "group": "Nature & Misc",
+      "keywords": "cold winter frost"
+    },
+    {
+      "name": "nf-md-sprout",
+      "cp": "F0E66",
+      "glyph": "󰹦",
+      "group": "Nature & Misc",
+      "keywords": "seedling grow plant"
+    },
+    {
+      "name": "nf-md-train",
+      "cp": "F052C",
+      "glyph": "󰔬",
+      "group": "Nature & Misc",
+      "keywords": "rail transport locomotive"
+    },
+    {
+      "name": "nf-md-tree",
+      "cp": "F0531",
+      "glyph": "󰔱",
+      "group": "Nature & Misc",
+      "keywords": "forest wood nature"
+    },
+    {
+      "name": "nf-md-trophy",
+      "cp": "F0538",
+      "glyph": "󰔸",
+      "group": "Nature & Misc",
+      "keywords": "award win prize"
+    },
+    {
+      "name": "nf-md-water",
+      "cp": "F058C",
+      "glyph": "󰖌",
+      "group": "Nature & Misc",
+      "keywords": "drop liquid hydro"
+    },
+    {
+      "name": "nf-md-waves",
+      "cp": "F078D",
+      "glyph": "󰞍",
+      "group": "Nature & Misc",
+      "keywords": "ocean sea water"
+    },
+    {
+      "name": "nf-md-weather_cloudy",
+      "cp": "F0590",
+      "glyph": "󰖐",
+      "group": "Nature & Misc",
+      "keywords": "overcast sky clouds"
+    },
+    {
+      "name": "nf-md-weather_lightning",
+      "cp": "F0593",
+      "glyph": "󰖓",
+      "group": "Nature & Misc",
+      "keywords": "storm thunder bolt"
+    },
+    {
+      "name": "nf-md-weather_night",
+      "cp": "F0594",
+      "glyph": "󰖔",
+      "group": "Nature & Misc",
+      "keywords": "moon dark evening"
+    },
+    {
+      "name": "nf-md-weather_rainy",
+      "cp": "F0597",
+      "glyph": "󰖗",
+      "group": "Nature & Misc",
+      "keywords": "rain wet precipitation"
+    },
+    {
+      "name": "nf-md-weather_snowy",
+      "cp": "F0598",
+      "glyph": "󰖘",
+      "group": "Nature & Misc",
+      "keywords": "snow cold winter"
+    },
+    {
+      "name": "nf-md-weather_sunny",
+      "cp": "F0599",
+      "glyph": "󰖙",
+      "group": "Nature & Misc",
+      "keywords": "sun clear day"
+    },
+    {
+      "name": "nf-md-yin_yang",
+      "cp": "F0680",
+      "glyph": "󰚀",
+      "group": "Nature & Misc",
+      "keywords": "balance harmony tao"
+    }
+  ]
+}
