@@ -135,7 +135,7 @@ Item {
     root.selectedIndex = 0
     root.appsRevision++
     root.revalidate()
-    root.maybeOfferImport()
+    importProbe.restart()
   }
 
   function revalidate() {
@@ -154,8 +154,11 @@ Item {
 
   function rebuildRows() {
     rows.clear()
-    for (var i = 0; i < root.workspaces.length; i++) {
-      var workspace = root.workspaces[i]
+    // Called from onConfigChanged, which can fire before the `workspaces`
+    // binding has been established, so read the config directly.
+    var list = root.config && root.config.workspaces ? root.config.workspaces : []
+    for (var i = 0; i < list.length; i++) {
+      var workspace = list[i]
       rows.append({
         rowWorkspaceId: workspace.id,
         rowKeyLabel: root.keyLabelFor(workspace.id),
@@ -183,8 +186,9 @@ Item {
     if (workspace.persistent) bits.push("persistent")
     if (workspace["default"]) bits.push("default")
     var apps = []
-    for (var i = 0; i < workspace.apps.length; i++) {
-      var app = workspace.apps[i]
+    var list = workspace.apps || []
+    for (var i = 0; i < list.length; i++) {
+      var app = list[i]
       apps.push(app.label || app.match.class || app.match.initialClass || app.match.title || "app")
     }
     if (apps.length) bits.push(apps.join(", "))
@@ -203,7 +207,9 @@ Item {
     if (index < 0 || index >= root.workspaces.length) return
     root.selectedIndex = index
     root.cursorIndex = index
-    root.appsRevision++
+    // No appsRevision bump: the detail pane already depends on the workspace
+    // object, so changing the selection rebuilds its app rows on its own.
+    // Bumping here as well tore every row down twice.
   }
 
   function addWorkspace() {
@@ -445,6 +451,15 @@ Item {
     wizard.open()
   }
 
+  // The three source files load asynchronously and independently, so the
+  // offer waits for them to settle. Without this the wizard opens with
+  // whichever FileView happened to finish first and reports "0 window rules".
+  Timer {
+    id: importProbe
+    interval: 250
+    onTriggered: root.maybeOfferImport()
+  }
+
   // Offered once per open, and only when there is genuinely no config yet.
   function maybeOfferImport() {
     if (root.everSaved || root.importOffered) return
@@ -520,16 +535,16 @@ Item {
     id: hyprlandFile
     path: root.home + "/.config/hypr/hyprland.lua"
     printErrors: false
-    onLoaded: { root.hyprlandLua = text(); root.maybeOfferImport() }
-    onLoadFailed: root.hyprlandLua = ""
+    onLoaded: { root.hyprlandLua = text(); importProbe.restart() }
+    onLoadFailed: { root.hyprlandLua = ""; importProbe.restart() }
   }
 
   FileView {
     id: autostartFile
     path: root.home + "/.config/hypr/autostart.lua"
     printErrors: false
-    onLoaded: { root.autostartLua = text(); root.maybeOfferImport() }
-    onLoadFailed: root.autostartLua = ""
+    onLoaded: { root.autostartLua = text(); importProbe.restart() }
+    onLoadFailed: { root.autostartLua = ""; importProbe.restart() }
   }
 
   // A hand-edited clone of omarchy.workspaces, if the user made one. Its
@@ -538,8 +553,8 @@ Item {
     id: cloneFile
     path: root.home + "/.config/omarchy/plugins/" + Quickshell.env("USER") + ".workspaces/Workspaces.qml"
     printErrors: false
-    onLoaded: { root.cloneQml = text(); root.maybeOfferImport() }
-    onLoadFailed: root.cloneQml = ""
+    onLoaded: { root.cloneQml = text(); importProbe.restart() }
+    onLoadFailed: { root.cloneQml = ""; importProbe.restart() }
   }
 
   FileView {

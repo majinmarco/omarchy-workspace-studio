@@ -132,7 +132,8 @@ Flickable {
         textFormat: Text.PlainText
         height: Style.spacing.controlHeight
         verticalAlignment: Text.AlignVCenter
-        text: "tooltip, optional bar label, and the workspace's default name"
+        text: "also the workspace's default name"
+        elide: Text.ElideRight
         color: root.foreground
         opacity: 0.5
         font.family: Style.font.menuFamily
@@ -352,7 +353,11 @@ Flickable {
       AppRow {
         required property int index
         width: root.width
-        app: root.workspace.apps[index]
+        // Guarded: during a removal the delegate can outlive its row by a
+        // frame, and AppRow tolerates a null app rather than throwing.
+        app: root.workspace && root.workspace.apps && index < root.workspace.apps.length
+          ? root.workspace.apps[index]
+          : null
         foreground: root.foreground
         onChanged: root.changed()
         onRemoveRequested: root.removeAppRequested(index)

@@ -17,6 +17,19 @@ BorderSurface {
   property color foreground: Color.menu.text
   property bool expanded: false
 
+  // A delegate outlives its data by a frame or two: when an app is removed, or
+  // the selected workspace changes, the bindings below re-evaluate once while
+  // `app` is already undefined. Reads go through `fields` so that frame is a
+  // no-op instead of a TypeError storm in the journal; writes bail out.
+  readonly property var blank: ({
+    label: "",
+    match: { "class": "", title: "", initialClass: "", initialTitle: "" },
+    launch: { mode: "none", launcher: "", command: "", args: "", delaySec: 0 },
+    rules: { float: null, size: "", move: "", silent: false }
+  })
+  readonly property var fields: root.app ? root.app : root.blank
+  readonly property bool ready: root.app !== null && root.app !== undefined
+
   signal changed()
   signal removeRequested()
   signal grabRequested()
@@ -44,12 +57,13 @@ BorderSurface {
   // Which of the two class-ish / title-ish keys currently carries a value.
   function activeKey(options, fallback) {
     for (var i = 0; i < options.length; i++) {
-      if (root.app.match[options[i].value]) return options[i].value
+      if (root.fields.match[options[i].value]) return options[i].value
     }
     return fallback
   }
 
   function setMatchKey(options, nextKey, keepValue) {
+    if (!root.ready) return
     var carried = keepValue
     for (var i = 0; i < options.length; i++) {
       var key = options[i].value
@@ -78,8 +92,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "App name (display only)"
         verticalPadding: Style.spacing.sm
-        text: root.app.label
+        text: root.fields.label
         onTextChanged: {
+          if (!root.ready) return
           if (root.app.label === text) return
           root.app.label = text
           root.changed()
@@ -128,8 +143,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "^chromium$   (regex, matched in full)"
         verticalPadding: Style.spacing.sm
-        text: root.app.match[classKind.value] || ""
+        text: root.fields.match[classKind.value] || ""
         onTextChanged: {
+          if (!root.ready) return
           var key = classKind.value
           if (root.app.match[key] === text) return
           root.app.match[key] = text
@@ -158,8 +174,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "Optional title pattern"
         verticalPadding: Style.spacing.sm
-        text: root.app.match[titleKind.value] || ""
+        text: root.fields.match[titleKind.value] || ""
         onTextChanged: {
+          if (!root.ready) return
           var key = titleKind.value
           if (root.app.match[key] === text) return
           root.app.match[key] = text
@@ -179,8 +196,9 @@ BorderSurface {
         showLabel: false
         foreground: root.foreground
         options: root.launchOptions
-        value: root.app.launch.mode
+        value: root.fields.launch.mode
         onChanged: function (next) {
+          if (!root.ready) return
           root.app.launch.mode = next
           root.changed()
         }
@@ -193,8 +211,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "Command, e.g. foot"
         verticalPadding: Style.spacing.sm
-        text: root.app.launch.command
+        text: root.fields.launch.command
         onTextChanged: {
+          if (!root.ready) return
           if (root.app.launch.command === text) return
           root.app.launch.command = text
           root.changed()
@@ -210,8 +229,9 @@ BorderSurface {
         to: 120
         stepSize: 1
         fieldWidth: Style.space(74)
-        value: root.app.launch.delaySec
+        value: root.fields.launch.delaySec
         onModified: function (next) {
+          if (!root.ready) return
           root.app.launch.delaySec = next
           root.changed()
         }
@@ -239,9 +259,10 @@ BorderSurface {
       Toggle {
         width: Style.space(150)
         label: "Float"
-        checked: root.app.rules.float === true
+        checked: root.fields.rules.float === true
         foreground: root.foreground
         onClicked: {
+          if (!root.ready) return
           root.app.rules.float = root.app.rules.float === true ? null : true
           root.changed()
         }
@@ -250,9 +271,10 @@ BorderSurface {
       Toggle {
         width: Style.space(150)
         label: "Silent"
-        checked: root.app.rules.silent === true
+        checked: root.fields.rules.silent === true
         foreground: root.foreground
         onClicked: {
+          if (!root.ready) return
           root.app.rules.silent = !root.app.rules.silent
           root.changed()
         }
@@ -269,8 +291,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "Size, e.g. 800 600"
         verticalPadding: Style.spacing.sm
-        text: root.app.rules.size
+        text: root.fields.rules.size
         onTextChanged: {
+          if (!root.ready) return
           if (root.app.rules.size === text) return
           root.app.rules.size = text
           root.changed()
@@ -282,8 +305,9 @@ BorderSurface {
         foreground: root.foreground
         placeholderText: "Position, e.g. 100 100"
         verticalPadding: Style.spacing.sm
-        text: root.app.rules.move
+        text: root.fields.rules.move
         onTextChanged: {
+          if (!root.ready) return
           if (root.app.rules.move === text) return
           root.app.rules.move = text
           root.changed()
