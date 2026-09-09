@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+# Workspace Studio — apply the generated Hyprland fragment.
+#
+# The editor has already written the two files this plugin owns:
+#
+#   ~/.config/omarchy/workspace-studio.json                       (source of truth)
+#   ~/.local/state/omarchy/toggles/hypr/zz-workspace-studio.lua   (compiled)
+#
+# This script reloads Hyprland so the fragment takes effect, then checks that
+# the result is sane. It exists as a separate script — rather than a `run()`
+# call from QML — so the reload, the health check and the rollback path can be
+# read, audited and run by hand.
+#
+# Rules registered at runtime cannot be removed: hl.workspace_rule() and
+# hl.window_rule() return opaque userdata with no remove(). So a real apply is
+# always a reload, never `hyprctl eval`.
+#
+# It needs no privileges. It runs no installer, downloads nothing, touches no
+# file under /tmp, and manages no services. The only files it writes are the
+# two named above plus a .bak next to the generated one.
+#
+# Usage:
+#   workspace-studio-apply [config-only|full]
+#   workspace-studio-apply --revert [config-only|full]
+
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/toggles/hypr"
+LUA_FILE="$STATE_DIR/zz-workspace-studio.lua"
+BACKUP_FILE="$LUA_FILE.bak"
+
+revert=0
+mode="config-only"
+
+for arg in "$@"; do
+  case "$arg" in
+    --revert) revert=1 ;;
+    config-only | full) mode="$arg" ;;
+    eval-only) mode="config-only" ;; # preview-only mode; applying still reloads
+    -h | --help)
+      sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    *)
+      printf 'workspace-studio-apply: unknown argument %s\n' "$arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
+notify() {
+  local urgency="$1" headline="$2" body="$3"
+  if command -v omarchy-notification-send >/dev/null 2>&1; then
+    omarchy-notification-send -u "$urgency" "$headline" "$body" >/dev/null 2>&1 || true
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send -u "$urgency" "$headline" "$body" >/dev/null 2>&1 || true
+  fi
+}
+
+fail() {
+  printf '%s\n' "$1" >&2
+  notify critical "Workspace Studio" "$1"
+  exit 1
+}
+
+command -v hyprctl >/dev/null 2>&1 || fail "hyprctl is not on PATH; is Hyprland running?"
+
+if [[ $revert -eq 1 ]]; then
+  [[ -f "$BACKUP_FILE" ]] || fail "No previous version to revert to ($BACKUP_FILE)."
+  # Swap, so reverting twice returns to where you were.
+  if [[ -f "$LUA_FILE" ]]; then
+    mv -f "$LUA_FILE" "$BACKUP_FILE.swap"
+    mv -f "$BACKUP_FILE" "$LUA_FILE"
+    mv -f "$BACKUP_FILE.swap" "$BACKUP_FILE"
+  else
+    mv -f "$BACKUP_FILE" "$LUA_FILE"
+  fi
+  printf 'Reverted %s\n' "$LUA_FILE"
+fi
+
+[[ -f "$LUA_FILE" ]] || fail "Nothing to apply: $LUA_FILE does not exist."
+
+# The fragment is loaded from the toggles directory by the
+# `require("default.hypr.toggles")` at the end of ~/.config/hypr/hyprland.lua,
+# which is the last thing that file does — so our unbinds win over earlier
+# config. A reload re-executes it from scratch, which is what makes deletions
+# take effect and stops window rules accumulating.
+#
+# config-only skips the monitor pass. That matters on laptops whose
+# monitors.lua re-syncs DPMS on config.reloaded and would relight a panel
+# under a closed lid.
+if [[ "$mode" == "config-only" ]]; then
+  hyprctl reload config-only >/dev/null || fail "hyprctl reload config-only failed."
+else
+  hyprctl reload >/dev/null || fail "hyprctl reload failed."
+fi
+
+problems=()
+
+errors=$(hyprctl configerrors 2>/dev/null || true)
+if [[ -n "$errors" && "$errors" != "no errors" ]]; then
+  problems+=("Hyprland reported config errors: ${errors//$'\n'/ }")
+fi
+
+# Hyprland 0.56.2 silently drops "code:NN" bind keycodes: they land in the bind
+# table with key="" and keycode=0, and then match on the modifier mask alone,
+# so a single SUPER+key press fires every bind sharing that mask. This plugin
+# never emits code:NN, but the check catches the rest of the config too — and
+# it is the difference between "the reload worked" and "the reload worked and
+# your keyboard still does what you expect".
+if command -v jq >/dev/null 2>&1; then
+  broken=$(hyprctl binds -j 2>/dev/null | jq '[.[] | select(.key == "" and .keycode == 0)] | length' 2>/dev/null || echo "?")
+  if [[ "$broken" != "0" && "$broken" != "?" ]]; then
+    problems+=("$broken keybinds have no key and match on their modifier mask alone.")
+  fi
+
+  duplicates=$(hyprctl binds -j 2>/dev/null |
+    jq -r '[.[] | select(.description | startswith("Switch to workspace")) | .key] | group_by(.) | map(select(length > 1)) | length' 2>/dev/null || echo "0")
+  if [[ "$duplicates" != "0" && "$duplicates" != "?" ]]; then
+    problems+=("$duplicates workspace keys are bound more than once.")
+  fi
+else
+  problems+=("jq is not installed, so the keybind health check was skipped.")
+fi
+
+if ((${#problems[@]} > 0)); then
+  printf '%s\n' "${problems[@]}" >&2
+  notify critical "Workspace Studio" "${problems[0]}"
+  exit 1
+fi
+
+rules=$(hyprctl workspacerules 2>/dev/null | grep -c "^Workspace rule" || true)
+printf 'Reloaded (%s). %s workspace rules, binds healthy.\n' "$mode" "${rules:-0}"

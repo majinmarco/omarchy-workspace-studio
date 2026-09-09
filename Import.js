@@ -15,6 +15,31 @@
 // Pure JavaScript: no QML globals, no Node globals. Depends on Config.js
 // being loaded into the same scope (chromiumWebAppClass, defaultApp, ...).
 
+// Config.js supplies the document constructors this file builds on. Node's vm
+// sandbox runs all three scripts in one scope, so they resolve directly; QML
+// gives every .js resource its own scope, so Studio.qml calls
+// Import.useConfig(Config) once at startup and everything routes through here.
+var __config = null;
+
+function useConfig(module) {
+  __config = module;
+}
+
+function config() {
+  if (__config) return __config;
+  if (typeof normalize === "function") {
+    __config = {
+      empty: empty,
+      normalize: normalize,
+      defaultApp: defaultApp,
+      defaultWorkspace: defaultWorkspace,
+      chromiumWebAppClass: chromiumWebAppClass
+    };
+    return __config;
+  }
+  throw new Error("Import.js needs Config.js: call useConfig(Config) first.");
+}
+
 // A tiny evaluator for the subset of Lua string expressions these files use:
 // literals, `local name = "..."` variables, `..` concatenation, and the
 // o.launch() wrapper. Anything it does not understand is reported as
@@ -275,7 +300,7 @@ function predictedClass(command) {
   if (profileMatch) profile = profileMatch[1] || profileMatch[2] || profileMatch[3] || "";
 
   var app = /--app=(?:'([^']*)'|"([^"]*)"|(\S+))/.exec(text);
-  if (app) return chromiumWebAppClass(app[1] || app[2] || app[3], profile);
+  if (app) return config().chromiumWebAppClass(app[1] || app[2] || app[3], profile);
 
   var appId = /--app-id=(?:'([^']*)'|"([^"]*)"|(\S+))/.exec(text);
   if (appId) {
@@ -322,14 +347,14 @@ function buildConfig(sources) {
   // races. "autostart" reproduces the user's existing exec-once ladder.
   var mode = input.launchMode === "autostart" ? "autostart" : (input.launchMode === "none" ? "none" : "onCreatedEmpty");
 
-  var config = empty();
+  var built = config().empty();
   var byId = {};
   var i;
 
   function ensure(id) {
     if (!byId[id]) {
-      byId[id] = defaultWorkspace(id);
-      config.workspaces.push(byId[id]);
+      byId[id] = config().defaultWorkspace(id);
+      built.workspaces.push(byId[id]);
     }
     return byId[id];
   }
@@ -344,7 +369,7 @@ function buildConfig(sources) {
   for (i = 0; i < rules.length; i++) {
     var rule = rules[i];
     var workspace = ensure(rule.id);
-    var app = defaultApp();
+    var app = config().defaultApp();
     app.label = rule.comment || "";
     if (rule.match.class) app.match.class = rule.match.class;
     if (rule.match.title) app.match.title = rule.match.title;
@@ -358,15 +383,15 @@ function buildConfig(sources) {
   for (i = 0; i < launches.length; i++) {
     var launch = launches[i];
     if (launch.landOn) {
-      config.apply.landOn = launch.landOn;
+      built.apply.landOn = launch.landOn;
       continue;
     }
     if (!launch.command) continue;
 
     var candidate = predictedClass(launch.command);
     var placed = false;
-    for (var w = 0; w < config.workspaces.length && !placed; w++) {
-      var target = config.workspaces[w];
+    for (var w = 0; w < built.workspaces.length && !placed; w++) {
+      var target = built.workspaces[w];
       for (var a = 0; a < target.apps.length && !placed; a++) {
         var existing = target.apps[a];
         if (existing.launch.mode !== "none") continue;
@@ -381,9 +406,9 @@ function buildConfig(sources) {
     if (!placed) unmatched.push(launch);
   }
 
-  if (config.apply.landOn && mode !== "autostart") config.apply.landOn = 0;
+  if (built.apply.landOn && mode !== "autostart") built.apply.landOn = 0;
 
-  return { config: normalize(config), unmatchedLaunches: unmatched };
+  return { config: config().normalize(built), unmatchedLaunches: unmatched };
 }
 
 // The report the wizard shows and the user acts on. Nothing here edits a file.
