@@ -4,6 +4,93 @@ All notable changes to Workspace Studio are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-09-09
+
+Two features: pick apps from the list of installed applications instead of
+typing a command, and draw a workspace's layout with the mouse instead of
+guessing at layout options.
+
+### Added
+
+- **App picker.** Press **Pick an app…** on an app row, **f** anywhere in the
+  editor, or **Add app**, and search the applications installed on the machine.
+  The list, its ordering and its icons are the launcher's, because the ranking
+  is a vendored copy of Omarchy's own `AppSearch.js` and the entries come
+  straight from Quickshell's `DesktopEntries`; `launcher.hides` is honoured, so
+  apps already hidden from the launcher stay hidden here. Picking one fills in
+  the name, the window class and the launch command.
+- **A class-confidence badge.** A desktop entry does not reliably carry the
+  Wayland app-id a window rule has to match, so the class is derived by a
+  ladder of rules and the row says how far it had to fall — from a web app's
+  URL or a `StartupWMClass` (high) down to the executable's name (low). A low
+  confidence also raises a validation warning. **Grab focused window** sits
+  next to the badge as the escape hatch, and a class you edit yourself is
+  marked "you set this" and is never overwritten by a later pick.
+- **A layout canvas** for each workspace, between the compositor settings and
+  the apps. Split a tile with **+** or by dropping another tile on its edge,
+  swap two tiles by dropping one on the middle of the other, drag a divider to
+  resize, double-click one to flip it between side-by-side and stacked, and
+  click a tile to choose which app lives in it. Seven presets — columns, rows,
+  main left/right/top/bottom, grid — rebuild the whole arrangement from the
+  app count.
+- **Three layout modes.** *Off* emits nothing, and is what every existing
+  config stays on. *Tiled* turns the drawing into a `layout` /`layout_opts`
+  pair on the workspace rule, so windows still tile. *Exact* emits each
+  rectangle as a `float` + `size "W% H%"` + `move "X% Y%"` window rule, which
+  reproduces any arrangement but stops those windows tiling.
+- **A fidelity note** under the canvas, because Tiled mode cannot render
+  everything. Two tiles and a main-plus-stack map onto `master` exactly; other
+  arrangements are approximated, and the canvas names what they will be
+  approximated as and offers a one-click switch to Exact.
+- **A warning when the layout toggle wins.** If
+  `~/.local/state/omarchy/workspace-layouts/<id>.lua` exists — written by
+  `omarchy-hyprland-workspace-layout-toggle` — Omarchy loads it after this
+  plugin's file, and Tiled mode on that workspace will look like it did
+  nothing. The canvas now says so.
+- `Layout.js`, a pure-JS slicing-tree module (normalize, rectangles,
+  splitters, hit-testing, the seven edits, the presets, and the projection onto
+  what the compositor can be told), plus `AppSearch.js`. Both are covered by
+  `node --test`: 82 cases became 170, including a golden pair — a byte copy of
+  a real 0.1.0 document and of the Lua it compiled into — that proves
+  everything here is additive.
+
+### Changed
+
+- **A typed command now beats a shared launcher.** The ladder is: a command you
+  typed, then a `launchers` entry, then the picked app's
+  `gtk-launch '<id>.desktop'`. Previously a launcher prefix beat a typed
+  command. No document written by 0.1.0 has a `launchers` entry and no UI ever
+  wrote one, so this is invisible in practice — but it is deliberate, so that
+  the manual field is always the last word.
+- **`layout` and `layout_opts` are whitelisted on the way out.** Hyprland
+  accepts `layout = "bogus"` and `layout_opts = { bogus_opt = 1 }` without
+  complaint and then ignores them, so a typo used to be a silent no-op with no
+  error anywhere. The generator now refuses any layout name outside
+  dwindle/master/scrolling, any option outside the seven it knows, and any
+  master orientation outside left/right/top/bottom/center.
+- The workspace list summary names the layout preset, so a row reads
+  `main left · Slack, WhatsApp`.
+
+### Notes
+
+- Both new keys are additive and optional: `apps[].desktop` and
+  `workspaces[].arrangement`. Neither is written unless it is used —
+  `arrangement` is omitted entirely while the mode is "off" — so a 0.1.0
+  document round-trips through 0.2.0 byte for byte and compiles to byte-identical
+  Lua. There is a test for exactly that.
+- The canvas's data lives under `arrangement` rather than `layout` because
+  `layout` was already the layout *name*, and the two coexist on purpose: an
+  explicit layout choice beats the canvas.
+- The plugin declares no new kinds and no new capabilities. It now reads the
+  installed `.desktop` files, indirectly, through the same `DesktopEntries`
+  singleton the shell already uses — and writes nothing new.
+- Deferred: driving dwindle's guillotine with `preselect` and a
+  `window.open` arranger, per-node ratios inside a master stack, and importing
+  an existing arrangement from live window geometry. None of them can be done
+  reliably yet: the dwindle split tree is private, no `hyprctl` request exposes
+  it, and `layoutmsg` only reaches the active workspace — so nothing can drive
+  the tiler and then check whether it worked. 0.2.0 stays declarative.
+
 ## [0.1.0] — 2026-09-09
 
 First release.

@@ -4,7 +4,10 @@
   "title": "Workspace Studio configuration",
   "description": "Documents ~/.config/omarchy/workspace-studio.json, the source of truth for the compositor layer. Purely presentational bar options live in the plugin's inline entry in ~/.config/omarchy/shell.json instead, not here. Config.js normalizes any document to this shape; nothing rejects a file outright.",
   "type": "object",
-  "required": ["version", "workspaces"],
+  "required": [
+    "version",
+    "workspaces"
+  ],
   "additionalProperties": false,
   "properties": {
     "version": {
@@ -18,7 +21,9 @@
       "description": "The workspaces this config owns, sorted by id. The length IS the workspace count: adding or removing an entry is how the count changes. Ids are stored explicitly rather than implied by position so gaps are allowed.",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -45,8 +50,17 @@
           "color": {
             "description": "Per-workspace tint for the bar button.",
             "anyOf": [
-              { "enum": ["default", "accent", "urgent"] },
-              { "type": "string", "pattern": "^#[0-9a-f]{6}$" }
+              {
+                "enum": [
+                  "default",
+                  "accent",
+                  "urgent"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-f]{6}$"
+              }
             ]
           },
           "monitor": {
@@ -63,26 +77,78 @@
             "description": "hl.workspace_rule.default: this workspace is its monitor's default. At most one per monitor."
           },
           "layout": {
-            "enum": ["", "dwindle", "master", "scrolling"],
+            "enum": [
+              "",
+              "dwindle",
+              "master",
+              "scrolling"
+            ],
             "description": "hl.workspace_rule.layout. Note that ~/.local/state/omarchy/workspace-layouts/<id>.lua, written by `omarchy-hyprland-workspace-layout-toggle`, is loaded after this file and therefore wins."
           },
           "layoutOpts": {
             "type": "object",
             "description": "hl.workspace_rule.layout_opts, e.g. { \"orientation\": \"center\" } for the master layout. Ignored unless layout is set.",
-            "additionalProperties": { "type": ["string", "number", "boolean"] }
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
           },
           "advanced": {
             "type": "object",
             "description": "The remaining verified hl.workspace_rule fields. null means 'do not emit', which is different from 0 or false.",
             "additionalProperties": false,
             "properties": {
-              "gapsIn": { "type": ["integer", "null"], "minimum": 0, "maximum": 200 },
-              "gapsOut": { "type": ["integer", "null"], "minimum": 0, "maximum": 200 },
-              "borderSize": { "type": ["integer", "null"], "minimum": 0, "maximum": 40 },
-              "decorate": { "type": ["boolean", "null"] },
-              "noRounding": { "type": ["boolean", "null"] },
-              "noBorder": { "type": ["boolean", "null"] },
-              "noShadow": { "type": ["boolean", "null"] }
+              "gapsIn": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 200
+              },
+              "gapsOut": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 200
+              },
+              "borderSize": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 40
+              },
+              "decorate": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "noRounding": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "noBorder": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "noShadow": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
             }
           },
           "apps": {
@@ -102,10 +168,24 @@
                   "description": "hl.window_rule.match. Values are regexes matched in full. At least one non-empty key is needed for a window rule to be emitted.",
                   "additionalProperties": false,
                   "properties": {
-                    "class": { "type": "string", "maxLength": 512 },
-                    "title": { "type": "string", "maxLength": 512 },
-                    "initialClass": { "type": "string", "maxLength": 512, "description": "Emitted as initial_class. Safer than class for apps that rewrite their class at runtime." },
-                    "initialTitle": { "type": "string", "maxLength": 512, "description": "Emitted as initial_title." }
+                    "class": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "initialClass": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "description": "Emitted as initial_class. Safer than class for apps that rewrite their class at runtime."
+                    },
+                    "initialTitle": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "description": "Emitted as initial_title."
+                    }
                   }
                 },
                 "launch": {
@@ -113,7 +193,11 @@
                   "additionalProperties": false,
                   "properties": {
                     "mode": {
-                      "enum": ["none", "onCreatedEmpty", "autostart"],
+                      "enum": [
+                        "none",
+                        "onCreatedEmpty",
+                        "autostart"
+                      ],
                       "description": "none emits only the window rule. onCreatedEmpty becomes hl.workspace_rule.on_created_empty, so the app starts the first time you land on the empty workspace - no boot cost and no sleep races. autostart becomes o.launch_on_start / o.exec_on_start, i.e. login-time only."
                     },
                     "launcher": {
@@ -126,7 +210,11 @@
                       "maxLength": 1024,
                       "description": "Raw command, used when no launcher is chosen. Always wrapped in o.launch() (uwsm-app) on the way out."
                     },
-                    "args": { "type": "string", "maxLength": 1024, "description": "Appended to the launcher's command." },
+                    "args": {
+                      "type": "string",
+                      "maxLength": 1024,
+                      "description": "Appended to the launcher's command."
+                    },
                     "delaySec": {
                       "type": "integer",
                       "minimum": 0,
@@ -140,12 +228,97 @@
                   "description": "Extra hl.window_rule effects.",
                   "additionalProperties": false,
                   "properties": {
-                    "float": { "type": ["boolean", "null"], "description": "true emits float, false emits tile, null emits neither." },
-                    "size": { "type": "string", "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$", "description": "e.g. \"800 600\"." },
-                    "move": { "type": "string", "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$", "description": "e.g. \"100 100\"." },
-                    "silent": { "type": "boolean", "description": "Emits workspace \"N silent\": the window lands there without pulling focus." }
+                    "float": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "true emits float, false emits tile, null emits neither."
+                    },
+                    "size": {
+                      "type": "string",
+                      "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$",
+                      "description": "e.g. \"800 600\"."
+                    },
+                    "move": {
+                      "type": "string",
+                      "pattern": "^$|^-?[0-9]+%?\\s+-?[0-9]+%?$",
+                      "description": "e.g. \"100 100\"."
+                    },
+                    "silent": {
+                      "type": "boolean",
+                      "description": "Emits workspace \"N silent\": the window lands there without pulling focus."
+                    }
+                  }
+                },
+                "desktop": {
+                  "type": "object",
+                  "description": "The installed application this app row was picked from. Additive and optional: absent in every document written before 0.2.0. Display fields are cached so the editor can draw the row without re-reading the .desktop file.",
+                  "additionalProperties": false,
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[^/'\\u0000-\\u001f]+$",
+                      "description": "DesktopEntry.id, WITHOUT the .desktop suffix. Single-quoted into `gtk-launch '<id>.desktop'` on the way out, so ids containing a quote, a slash or a control character are refused rather than escaped."
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "Cached DesktopEntry.name. Display only."
+                    },
+                    "icon": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "Cached DesktopEntry.icon NAME, or an absolute path. Display only."
+                    },
+                    "classSource": {
+                      "enum": [
+                        "",
+                        "startupClass",
+                        "webapp",
+                        "appId",
+                        "tui",
+                        "reverseDns",
+                        "exec",
+                        "id",
+                        "manual"
+                      ],
+                      "description": "Which rule derived match.class, which is what the editor's confidence badge reports. \"manual\" means the user edited the class afterwards, and a later pick must not overwrite it. \"exec\" and \"id\" are guesses and raise a validation warning."
+                    }
                   }
                 }
+              }
+            }
+          },
+          "arrangement": {
+            "type": "object",
+            "description": "How the layout canvas arranges this workspace. Additive and optional: absent in every document written before 0.2.0, and omitted entirely whenever mode is \"none\", so an older document round-trips byte-identically. Named `arrangement` rather than `layout` because `layout` above is the layout NAME and the two deliberately coexist - an explicit layout name beats the canvas.",
+            "additionalProperties": false,
+            "required": [
+              "mode"
+            ],
+            "properties": {
+              "mode": {
+                "enum": [
+                  "none",
+                  "tiled",
+                  "float"
+                ],
+                "description": "none emits nothing. tiled projects the tree onto hl.workspace_rule layout / layout_opts, which is exact for two tiles and for main+stack and approximated otherwise. float emits every leaf's rectangle onto that app's window rule as float + size \"W% H%\" + move \"X% Y%\", which is exact for any arrangement but stops those windows tiling."
+              },
+              "topReservePct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 50,
+                "description": "float mode only: percent of the monitor height left free at the top for the bar. Hyprland's move/size percentages are of the whole monitor, not of the usable area, so without this the top row sits under the bar. Derived from hyprctl -j monitors `reserved` when the mode is first chosen."
+              },
+              "root": {
+                "description": "The slicing tree. A node is a leaf or a split and never both. Depth is capped at 4 and leaves at 8.",
+                "$ref": "#/definitions/layoutNode"
               }
             }
           }
@@ -157,11 +330,19 @@
       "description": "Shared command prefixes, so a browser profile flag is typed once instead of on every web app.",
       "additionalProperties": {
         "type": "object",
-        "required": ["command"],
+        "required": [
+          "command"
+        ],
         "additionalProperties": false,
         "properties": {
-          "label": { "type": "string", "maxLength": 64 },
-          "command": { "type": "string", "maxLength": 1024 }
+          "label": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "command": {
+            "type": "string",
+            "maxLength": 1024
+          }
         }
       }
     },
@@ -169,14 +350,29 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean", "description": "Emit workspace binds at all." },
-        "focusMods": { "type": "string", "description": "Modifiers for 'switch to workspace N'." },
-        "moveMods": { "type": "string", "description": "Modifiers for 'move window to workspace N'." },
-        "moveSilentMods": { "type": "string", "description": "Modifiers for 'move window silently to workspace N'." },
+        "enabled": {
+          "type": "boolean",
+          "description": "Emit workspace binds at all."
+        },
+        "focusMods": {
+          "type": "string",
+          "description": "Modifiers for 'switch to workspace N'."
+        },
+        "moveMods": {
+          "type": "string",
+          "description": "Modifiers for 'move window to workspace N'."
+        },
+        "moveSilentMods": {
+          "type": "string",
+          "description": "Modifiers for 'move window silently to workspace N'."
+        },
         "keysyms": {
           "type": "array",
           "maxItems": 12,
-          "items": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_]+$"
+          },
           "description": "Key per workspace position. KEYSYMS ONLY: Hyprland 0.56.2 silently drops \"code:NN\" bind keycodes, which then match on the modifier mask alone and fire every bind sharing that mask. The generator refuses anything starting with 'code'."
         },
         "unbindUnused": {
@@ -190,7 +386,11 @@
       "additionalProperties": false,
       "properties": {
         "reloadMode": {
-          "enum": ["config-only", "full", "eval-only"],
+          "enum": [
+            "config-only",
+            "full",
+            "eval-only"
+          ],
           "description": "config-only is the default: it rebuilds rules and binds without re-applying monitor config. Runtime rules cannot be removed once registered, so a real apply is always a reload; eval-only is preview and additive changes only."
         },
         "landOn": {
@@ -200,6 +400,60 @@
           "description": "Workspace to focus after an autostart restore. 0 disables. Only emitted when something actually autostarts."
         }
       }
+    }
+  },
+  "definitions": {
+    "layoutNode": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "app"
+          ],
+          "description": "A leaf: one tile.",
+          "properties": {
+            "app": {
+              "type": "integer",
+              "minimum": -1,
+              "description": "Index into this workspace's apps[]. -1 means \"any other window\". Duplicates are allowed - two windows of the same app is a real case - but only the first rectangle can be emitted, because a window rule cannot tell two windows of one app apart."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dir",
+            "ratio",
+            "kids"
+          ],
+          "description": "A split: two children and the boundary between them.",
+          "properties": {
+            "dir": {
+              "enum": [
+                "h",
+                "v"
+              ],
+              "description": "h puts the children side by side (a vertical splitter); v stacks them."
+            },
+            "ratio": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 0.95,
+              "description": "Fraction of the parent box taken by kids[0]. Stored to three decimals so the file stays diffable."
+            },
+            "kids": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/definitions/layoutNode"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

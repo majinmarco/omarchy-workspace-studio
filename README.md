@@ -10,7 +10,9 @@ It ships two things:
 - **A bar widget** that draws one button per workspace with your icon and name.
   Left click focuses. Right click opens the editor.
 - **An editor overlay** that writes the Hyprland config for you: workspace
-  rules, window rules, launches and the `SUPER+N` keybinds.
+  rules, window rules, launches and the `SUPER+N` keybinds. Apps are picked
+  from the list of installed applications, and each workspace's layout is
+  drawn with the mouse.
 
 ![Workspace Studio](preview.png)
 
@@ -86,6 +88,119 @@ The wizard also offers to convert your `exec-once` ladder into
 `on_created_empty`, so apps start the first time you visit their workspace
 instead of racing each other at login. That is the recommended setting: no boot
 cost, no `sleep` ladder, and the window rules still route everything.
+
+## Adding apps
+
+**Pick an app…** on an app row — or `f` anywhere in the editor — opens a search
+over the applications installed on this machine. It is the same list, in the
+same order, with the same icons as Omarchy's own launcher: the ranking is a
+vendored copy of `AppSearch.js` from `/usr/share/omarchy/shell/services`, the
+entries come from Quickshell's `DesktopEntries`, and `launcher.hides` is
+honoured, so anything already hidden from the launcher stays hidden here.
+
+Picking an entry fills in three things: the display name, the launch command
+(`gtk-launch '<id>.desktop'`, which is exactly what the Omarchy launcher runs,
+because `uwsm app` rejects desktop ids containing spaces and this machine has
+`Google Maps.desktop`), and the **window class** the rule will match on.
+
+### The class-confidence badge
+
+That last one is a guess, and the badge next to it says how good a guess.
+
+A `.desktop` file does not reliably carry the Wayland app-id a window rule has
+to match. Of the 74 entries in `/usr/share/applications` on a stock Omarchy,
+**20 set `StartupWMClass` and 54 do not**; `chromium.desktop` ships the
+unsubstituted placeholder `@@startup_wm_class`; a Chromium PWA advertises
+`crx_<id>` while the compositor reports `chrome-<id>-Profile_2`; and the
+webapp entries Omarchy writes set nothing at all. So the class is derived by a
+ladder, and the badge names the rung it landed on:
+
+| Badge | Rung | Example |
+|---|---|---|
+| **high** | the URL of an Omarchy web app | `^chrome-web\.whatsapp\.com__-.*$` |
+| **high** | a Chromium `--app-id` | `^chrome-dlijm…-.*$` |
+| **high** | a terminal app's `--app-id` | `^TUI\.tile$` |
+| **high** | `StartupWMClass` | `^[Ss]potify$` |
+| medium | a reverse-DNS entry id | `^org\.gnome\.Nautilus$` |
+| low | the executable's name | `^chromium$` |
+| low | the entry id | — |
+
+A **low** badge also raises a warning in the footer. When one appears, open the
+app once and press **Grab focused window**: that reads `hyprctl activewindow`
+and fills in the class the compositor actually reports, which is the only
+ground truth there is. A class you type or grab yourself is marked *"you set
+this"* and is never overwritten by a later pick.
+
+Two details worth knowing. The profile directory in a web app's class is not
+knowable from its entry — `omarchy-launch-webapp` passes no
+`--profile-directory` and Chromium falls back to `last_used` — so the tail is
+emitted as a wildcard, the same shape Omarchy's own `browser.lua` rules use.
+And `StartupWMClass` disagrees with the live window about capitalisation often
+enough (`spotify` vs `Spotify`) that the first letter is emitted as a character
+class.
+
+### Typing a command instead
+
+Every app row still has a command field, and **a typed command always wins**.
+The order is: your typed command, then a `launchers` entry, then the picked
+app. The picker's **Enter a command manually…** button is the way out of the
+list, and clearing the command field hands control back to the picked app.
+
+## Drawing a layout
+
+Each workspace has a canvas between its compositor settings and its apps. It
+draws the monitor at its real aspect ratio, with the strip the bar reserves
+shaded at the top.
+
+- **Split** a tile with **+**, or by dropping another tile on its edge.
+- **Swap** two tiles by dropping one on the middle of the other.
+- **Resize** by dragging a divider; **double-click** one to flip it between
+  side-by-side and stacked.
+- **Click** a tile to choose which of the workspace's apps lives in it, or
+  "any window", or to add a new app.
+- **Presets** — columns, rows, main left/right/top/bottom, grid — rebuild the
+  whole arrangement from the app count.
+
+Eight tiles and four levels of nesting is the ceiling, which is more than a
+workspace can usefully hold.
+
+### Off, Tiled and Exact
+
+| Mode | What it emits | Fidelity |
+|---|---|---|
+| **Off** | nothing | the default, and what every pre-0.2 config stays on |
+| **Tiled** | `layout` + `layout_opts` on the workspace rule | exact for two tiles and for main+stack; approximated otherwise |
+| **Exact** | `float` + `size "W% H%"` + `move "X% Y%"` on each app's window rule | exact for any arrangement, but those windows stop tiling |
+
+**Tiled is the one to want**, because the windows stay tiled and nothing is
+placed by pixel. But Hyprland can only be told a layout name and a couple of
+options per workspace — it cannot be handed a tree. Two tiles, and a main area
+with an even stack beside it, map onto `master` with an `mfact` exactly.
+Anything else does not, and the canvas says so:
+
+> Approximated as main left. Hyprland can only be told a layout and a couple of
+> options per workspace.
+
+with a **Use exact instead** button next to it. Exact mode reproduces the
+drawing rectangle for rectangle, at the cost of floating those windows.
+
+Hyprland's `move` and `size` percentages are of the whole monitor, not of the
+area left over after the bar, so Exact mode carries a **Top inset** — filled in
+from `hyprctl -j monitors` when you switch to it — that keeps the top row out
+from under the bar.
+
+### Why there is no "arrange my windows now"
+
+Nothing can read a tiled workspace back. Hyprland's dwindle split tree is
+private (`m_dwindleNodesData`), no `hyprctl` request exposes it, and
+`hyprctl -j clients` carries geometry but no split or ratio. `layoutmsg` — the
+one dispatcher that could drive the tiler — only acts on the *active*
+workspace, so arranging anything at login is structurally impossible.
+
+Driving a tiler open-loop, with no way to detect or correct a mistake, is how
+you get a scrambled workspace and no way back. So this version is entirely
+declarative: two kinds of rule, written once, applied by the compositor. A
+`window.open` arranger is the obvious next step and is deliberately deferred.
 
 ## What it writes
 
@@ -215,6 +330,16 @@ picker's free-text field; a workspace icon is just a string.
   rather than stripping them. `tests/hyprgen.test.mjs` drives eleven real
   break-out payloads through it.
 - The plugin writes exactly two paths, both under `$HOME`, both listed above.
+- The app picker reads `/usr/share/applications` and
+  `~/.local/share/applications` — indirectly, through the same Quickshell
+  `DesktopEntries` singleton the shell's own launcher uses. It reads nothing it
+  did not already have access to, and writes nothing new. A picked desktop id
+  is single-quoted into `gtk-launch '<id>.desktop'` and any id containing a
+  quote, a slash or a control character is refused outright rather than
+  escaped.
+- Hyprland validates neither layout names nor `layout_opts` keys — `layout =
+  "bogus"` passes its own config check and then does nothing — so the generator
+  whitelists both rather than passing a typo through to a silent no-op.
 
 ## Hacking on it
 
@@ -224,10 +349,28 @@ qmllint -I /usr/share/omarchy/shell *.qml components/*.qml      # see note below
 omarchy plugin validate .
 ```
 
-`Config.js`, `HyprGen.js` and `Import.js` are plain scripts with no module
-system, because that is what QML's `import "X.js" as X` wants. The tests load
-the identical files through `node:vm`, so there is no Node-only variant to
-drift.
+`Config.js`, `HyprGen.js`, `Layout.js`, `Import.js` and `AppSearch.js` are plain
+scripts with no module system, because that is what QML's `import "X.js" as X`
+wants. The tests load the identical files through `node:vm`, so there is no
+Node-only variant to drift.
+
+QML also gives each of those files its own scope, so a module that needs
+another has to be handed it explicitly. `Studio.qml` does that once, on
+startup: `Importer.useConfig(Config)`, `Config.useLayout(Layout)` and
+`HyprGen.useLayoutModule(Layout)`.
+
+`AppSearch.js` is a verbatim copy of
+`/usr/share/omarchy/shell/services/AppSearch.js`, kept because the host only
+hands `shell.appLibrary` to plugins that declare the `menu` kind, and this
+plugin is a bar widget and an overlay. Taking that kind to reach a ranking
+function would also demand an `entryPoints.menu` and would describe the plugin
+as something it is not. `tests/appsearch.test.mjs` pins the behaviour the
+picker depends on, so re-copying from a newer Omarchy that changed the ranking
+fails there rather than quietly reordering everyone's list.
+
+`tests/fixtures/` holds a byte copy of a real 0.1.0 document and of the Lua it
+compiled into. `tests/golden.test.mjs` asserts both still round-trip
+byte-identically, which is what makes every later change provably additive.
 
 For `qmllint` to resolve `qs.Commons` and `qs.Ui`, the import path needs a
 directory whose *name* is `qs`:
@@ -271,6 +414,14 @@ journalctl -t omarchy-shell -f
   `~/.local/state/omarchy/workspace-layouts/<id>.lua`, which Omarchy loads
   *after* the toggles directory. If you toggle a layout by hand, that beats the
   layout set here — which is probably what you want, but it is worth knowing.
+  The canvas notices such a file and says so, because otherwise Tiled mode on
+  that workspace looks like it did nothing.
+- **Tiled mode cannot draw everything.** Columns, rows and grids of three or
+  more are approximated as main-plus-stack; the canvas names the approximation
+  and offers Exact instead. Per-tile ratios inside a stack are not expressible
+  at all.
+- **Exact mode floats.** Windows placed by percentage do not tile, and a new
+  window on that workspace tiles around them.
 - **Twelve workspaces is the ceiling**, because that is where the digit row runs
   out. Ten fit on `1`…`0`; 11 and 12 land on `minus` and `equal`.
 - **Special workspaces** (`special:magic`) are not modelled yet. The schema

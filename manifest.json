@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "majinmarco.workspace-studio",
   "name": "Workspace Studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "majinmarco",
   "license": "MIT",
   "description": "Design your Hyprland workspaces: how many, an icon and name for each, a default layout, and the apps that live there - from a native Omarchy panel.",

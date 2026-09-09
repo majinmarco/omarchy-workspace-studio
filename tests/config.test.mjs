@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadSandbox, readRepoJson, plain } from './sandbox.helper.mjs';
+import { loadSandbox, readRepoFile, readRepoJson, plain } from './sandbox.helper.mjs';
 
 const S = loadSandbox();
 
@@ -584,4 +584,44 @@ test('an un-injected Config preserves the arrangement rather than dropping it', 
   });
   assert.equal(config.workspaces[0].arrangement.mode, 'tiled');
   assert.equal(config.workspaces[0].arrangement.root.kids.length, 2);
+});
+
+// ------------------------------------------------------ schema coverage
+
+test('config.schema.json documents every key the model writes', () => {
+  const schema = readRepoJson('config.schema.json');
+  const workspace = schema.properties.workspaces.items.properties;
+  const app = workspace.apps.items.properties;
+
+  for (const key of Object.keys(S.defaultWorkspace(1))) {
+    assert.ok(workspace[key], 'workspace.' + key + ' is undocumented');
+  }
+  for (const key of Object.keys(S.defaultApp())) {
+    assert.ok(app[key], 'app.' + key + ' is undocumented');
+  }
+  // The two additive 0.2.0 keys, which no default carries.
+  assert.ok(workspace.arrangement, 'workspace.arrangement is undocumented');
+  assert.ok(app.desktop, 'app.desktop is undocumented');
+  assert.ok(schema.definitions.layoutNode, 'the layout tree is undocumented');
+});
+
+test('the schema agrees with the model about the enums it repeats', () => {
+  const schema = readRepoJson('config.schema.json');
+  const workspace = schema.properties.workspaces.items.properties;
+  assert.deepEqual(workspace.arrangement.properties.mode.enum, ['none', 'tiled', 'float']);
+  assert.deepEqual(
+    workspace.apps.items.properties.desktop.properties.classSource.enum,
+    ['', 'startupClass', 'webapp', 'appId', 'tui', 'reverseDns', 'exec', 'id', 'manual']);
+  // Every source the derivation can actually produce has to be in that list.
+  for (const source of ['webapp', 'appId', 'tui', 'startupClass', 'reverseDns', 'exec', 'id']) {
+    assert.notEqual(S.classConfidence(source), '', source);
+  }
+});
+
+test('the manifest, the changelog and the generator agree on the version', () => {
+  const manifest = readRepoJson('manifest.json');
+  assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(manifest.version, S.GENERATOR_VERSION);
+  assert.ok(readRepoFile('CHANGELOG.md').includes('## [' + manifest.version + ']'),
+    'CHANGELOG has no entry for ' + manifest.version);
 });
