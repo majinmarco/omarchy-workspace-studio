@@ -250,14 +250,17 @@ test('moveWorkspace swaps ids so the content moves and the key stays put', () =>
 
 // ------------------------------------------------------- chromium web apps
 
+// Checked against three real windows: dots in the host survive, every "/"
+// becomes "_", and the host/path boundary adds one more "_".
 test('chromiumWebAppClass predicts the class Chromium gives a web app', () => {
-  assert.equal(S.chromiumWebAppClass('https://web.whatsapp.com/', 'Profile 2'), 'chrome-web_whatsapp_com_-Profile_2');
+  assert.equal(S.chromiumWebAppClass('https://web.whatsapp.com/', 'Profile 2'), 'chrome-web.whatsapp.com__-Profile_2');
   assert.equal(
     S.chromiumWebAppClass('https://app.slack.com/client/T681EDZRV/', 'Profile 2'),
-    'chrome-app_slack_com_client_T681EDZRV_-Profile_2'
+    'chrome-app.slack.com__client_T681EDZRV_-Profile_2'
   );
-  assert.equal(S.chromiumWebAppClass('https://claude.ai/', 'Profile 2'), 'chrome-claude_ai_-Profile_2');
-  assert.equal(S.chromiumWebAppClass('https://example.com/', ''), 'chrome-example_com_-Default');
+  assert.equal(S.chromiumWebAppClass('https://claude.ai/', 'Profile 2'), 'chrome-claude.ai__-Profile_2');
+  assert.equal(S.chromiumWebAppClass('https://example.com', ''), 'chrome-example.com__-Default');
+  assert.equal(S.chromiumWebAppClass('https://example.com/x?y=1#z', 'Default'), 'chrome-example.com__x-Default');
   assert.equal(S.chromiumWebAppClass('', 'Profile 2'), '');
 });
 

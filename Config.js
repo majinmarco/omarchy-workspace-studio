@@ -598,18 +598,30 @@ function moveWorkspace(config, id, delta) {
 }
 
 // Chromium derives a web app's window class from the URL and the profile
-// directory: chrome-<host+path with . and / replaced by _>-Profile_<n>.
-// Predicting it is the single biggest usability win over hand-editing, because
-// it is otherwise only discoverable from `hyprctl clients`.
+// directory. Predicting it is the single biggest usability win over
+// hand-editing, because it is otherwise only discoverable from
+// `hyprctl clients` while the window happens to be open.
+//
+// The shape below was read off three live windows on a real machine:
+//
+//   https://web.whatsapp.com/            -> chrome-web.whatsapp.com__-Profile_2
+//   https://app.slack.com/client/T6.../  -> chrome-app.slack.com__client_T6..._-Profile_2
+//   https://claude.ai/                   -> chrome-claude.ai__-Profile_2
+//
+// So: dots in the host are KEPT, every "/" becomes "_", and the host/path
+// boundary contributes one extra "_" of its own.
 function chromiumWebAppClass(url, profileDirectory) {
   var raw = cleanString(url, 512);
   if (!raw) return "";
   var stripped = raw.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, "");
   stripped = stripped.replace(/[?#].*$/, "");
-  stripped = stripped.replace(/\/+$/, "/");
-  var slug = stripped.replace(/[./]/g, "_");
+  var slash = stripped.indexOf("/");
+  var host = slash === -1 ? stripped : stripped.slice(0, slash);
+  var path = slash === -1 ? "/" : stripped.slice(slash);
+  if (!path) path = "/";
+  var slug = host + "_" + path.replace(/\//g, "_");
   var profile = cleanString(profileDirectory, 64) || "Default";
-  var suffix = profile === "Default" ? "Default" : profile.replace(/\s+/g, "_");
+  var suffix = profile.replace(/\s+/g, "_");
   return "chrome-" + slug + "-" + suffix;
 }
 

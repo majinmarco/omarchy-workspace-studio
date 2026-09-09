@@ -11,7 +11,7 @@ const here = new URL('.', import.meta.url);
 export function loadSandbox() {
   const sandbox = {};
   vm.createContext(sandbox);
-  for (const name of ['Config.js', 'HyprGen.js']) {
+  for (const name of ['Config.js', 'HyprGen.js', 'Import.js']) {
     const source = fs.readFileSync(new URL('../' + name, here), 'utf8');
     vm.runInContext(source, sandbox, { filename: name });
   }
