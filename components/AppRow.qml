@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import qs.Commons
 import qs.Ui
+import "../Config.js" as Config
 
 // One app pinned to a workspace: the window rule that routes it there, and
 // optionally how to start it.
@@ -25,7 +27,8 @@ BorderSurface {
     label: "",
     match: { "class": "", title: "", initialClass: "", initialTitle: "" },
     launch: { mode: "none", launcher: "", command: "", args: "", delaySec: 0 },
-    rules: { float: null, size: "", move: "", silent: false }
+    rules: { float: null, size: "", move: "", silent: false },
+    desktop: null
   })
   readonly property var fields: root.app ? root.app : root.blank
   readonly property bool ready: root.app !== null && root.app !== undefined
@@ -33,6 +36,7 @@ BorderSurface {
   signal changed()
   signal removeRequested()
   signal grabRequested()
+  signal pickRequested()
 
   radius: Style.cornerRadius
   color: Style.normalFillFor(root.foreground, Color.accent, Color.urgent)
@@ -53,6 +57,33 @@ BorderSurface {
     { value: "onCreatedEmpty", label: "On first visit" },
     { value: "autostart", label: "At login" }
   ]
+
+  readonly property var desktop: root.fields.desktop || null
+  readonly property string desktopName: root.desktop ? (root.desktop.name || root.desktop.id) : ""
+  readonly property string classSource: root.desktop ? String(root.desktop.classSource || "") : ""
+  readonly property string confidence: Config.classConfidence(root.classSource)
+
+  // A derived class is a guess of varying quality, so say which. "Grab focused
+  // window" sits next to it as the escape hatch, because that one reads the
+  // real thing out of hyprctl.
+  readonly property color confidenceColor: root.confidence === "low"
+    ? Color.urgent
+    : (root.confidence === "medium" ? root.foreground : Color.accent)
+
+  function desktopIconSource() {
+    var name = root.desktop ? String(root.desktop.icon || "") : ""
+    if (!name) return Quickshell.iconPath("application-x-executable", true)
+    if (name.charAt(0) === "/") return "file://" + name
+    var themed = Quickshell.iconPath(name, true)
+    return themed.length > 0 ? themed : Quickshell.iconPath("application-x-executable", true)
+  }
+
+  // The class was picked from a desktop entry, and the user has since edited
+  // it: stop claiming the entry produced it.
+  function markClassManual() {
+    if (!root.ready || !root.app.desktop) return
+    root.app.desktop.classSource = "manual"
+  }
 
   // Which of the two class-ish / title-ish keys currently carries a value.
   function activeKey(options, fallback) {
@@ -123,6 +154,70 @@ BorderSurface {
       }
     }
 
+    // ---- the app this row was picked from
+    Row {
+      width: parent.width
+      spacing: Style.spacing.sm
+
+      Image {
+        id: desktopIcon
+        visible: root.desktop !== null
+        width: visible ? Style.font.iconLarge : 0
+        height: Style.spacing.controlHeight
+        fillMode: Image.PreserveAspectFit
+        sourceSize.width: Style.font.iconLarge * Screen.devicePixelRatio
+        sourceSize.height: Style.font.iconLarge * Screen.devicePixelRatio
+        source: root.desktop ? root.desktopIconSource() : ""
+        asynchronous: true
+      }
+
+      Button {
+        id: pickButton
+        text: root.desktop ? (root.desktopName || "Change app…") : "Pick an app…"
+        iconText: root.desktop ? "" : "󰀻"
+        tooltipText: root.desktop
+          ? "Point this row at a different installed application"
+          : "Choose an installed application; its window class and launch command are filled in for you"
+        foreground: root.foreground
+        bordered: true
+        onClicked: root.pickRequested()
+      }
+
+      // The confidence badge. High means the entry told us the class outright
+      // (StartupWMClass, a web app URL, a Chromium app id); low means it was
+      // inferred from the command and is worth confirming.
+      Text {
+        id: confidenceBadge
+        visible: root.desktop !== null && root.confidence !== ""
+        textFormat: Text.PlainText
+        width: visible ? Style.space(210) : 0
+        height: Style.spacing.controlHeight
+        verticalAlignment: Text.AlignVCenter
+        text: root.confidence === "manual"
+          ? "class: you set this"
+          : root.confidence + " confidence · " + Config.classSourceLabel(root.classSource)
+        color: root.confidenceColor
+        opacity: root.confidence === "high" ? 0.75 : 1
+        font.family: Style.font.menuFamily
+        font.pixelSize: Style.font.caption
+        elide: Text.ElideRight
+      }
+
+      Button {
+        visible: root.desktop !== null
+        text: "Forget"
+        tooltipText: "Unlink the app; the window match and any typed command stay as they are"
+        foreground: root.foreground
+        fontSize: Style.font.caption
+        horizontalPadding: Style.spacing.sm
+        onClicked: {
+          if (!root.ready) return
+          delete root.app.desktop
+          root.changed()
+        }
+      }
+    }
+
     // ---- window match
     Row {
       width: parent.width
@@ -149,6 +244,9 @@ BorderSurface {
           var key = classKind.value
           if (root.app.match[key] === text) return
           root.app.match[key] = text
+          // A hand-edited class must never be silently overwritten by a later
+          // pick, and must stop advertising a confidence it no longer has.
+          root.markClassManual()
           root.changed()
         }
       }
@@ -209,7 +307,9 @@ BorderSurface {
         width: parent.width - launchMode.width - (delayField.visible ? delayField.width + Style.spacing.sm : 0) - Style.spacing.sm
         visible: launchMode.value !== "none"
         foreground: root.foreground
-        placeholderText: "Command, e.g. foot"
+        placeholderText: root.desktop
+          ? "Optional — overrides " + root.desktopName
+          : "Command, e.g. foot"
         verticalPadding: Style.spacing.sm
         text: root.fields.launch.command
         onTextChanged: {

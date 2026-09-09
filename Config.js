@@ -822,50 +822,58 @@ function deriveClass(entry) {
     if (slug) return wildcardProfile(slug, "webapp", "high");
   }
 
-  // 2. A Chromium app-id window. NEVER StartupWMClass here: it says
-  //    crx_<id>, which is not what the compositor sees.
-  var appId = exec.match(/--app-id=([A-Za-z0-9]+)/);
-  if (appId) return wildcardProfile("chrome-" + appId[1], "appId", "high");
-
-
-  // 3. A Chromium --app=URL window.
-  var appUrl = exec.match(/--app=(?:"([^"]*)"|'([^']*)'|(\S+))/);
-  if (appUrl) {
-    var slug3 = stripProfileTail(chromiumWebAppClass(appUrl[1] || appUrl[2] || appUrl[3] || "", ""));
-    if (slug3) return wildcardProfile(slug3, "webapp", "high");
-  }
-
-  // 4. A terminal app launched with an explicit app-id, or Omarchy's TUI
-  //    launcher, whose default is org.omarchy.<command>.
-  var explicitAppId = exec.match(/(?:xdg-terminal-exec|omarchy-launch-tui)[^\n]*--app-id=(\S+)/);
+  // 2. A terminal app launched with an explicit app-id. This has to come
+  //    BEFORE the Chromium rules: Omarchy's TUI entries are
+  //    `xdg-terminal-exec --app-id=TUI.tile -e ...`, and a rule looking only
+  //    for --app-id would claim them as Chromium web apps.
+  var explicitAppId = exec.match(/(?:xdg-terminal-exec|omarchy-launch-tui)[^\n]*?--app-id=(?:"([^"]*)"|'([^']*)'|(\S+))/);
   if (explicitAppId) {
-    return { "class": escapeClassRegex(explicitAppId[1]), source: "tui", confidence: "high" };
+    var termId = explicitAppId[1] || explicitAppId[2] || explicitAppId[3] || "";
+    if (termId) return { "class": escapeClassRegex(termId), source: "tui", confidence: "high" };
   }
+
+  // 3. Omarchy's TUI launcher with no app-id names the window
+  //    org.omarchy.<command> (omarchy-launch-tui:10).
   var tui = exec.match(/^omarchy-launch-tui\s+(\S+)/);
   if (tui) {
     var base = String(tui[1]).replace(/^.*\//, "");
     return { "class": escapeClassRegex("org.omarchy." + base), source: "tui", confidence: "high" };
   }
 
-  // 5. StartupWMClass, when it is not chromium.desktop's unsubstituted
+  // 4. A Chromium app-id window. NEVER StartupWMClass here: it says
+  //    crx_<id>, which is not what the compositor sees. Guarded on the
+  //    executable actually being a Chromium-family browser, because
+  //    --app-id is not a flag only Chromium has.
+  var argv0Raw = (exec.split(/\s+/)[0] || "").replace(/^.*\//, "");
+  var isBrowser = /^(chromium|chrome|google-chrome|brave|vivaldi|thorium|microsoft-edge)/i.test(argv0Raw);
+  var appId = exec.match(/--app-id=([A-Za-z0-9]+)/);
+  if (isBrowser && appId) return wildcardProfile("chrome-" + appId[1], "appId", "high");
+
+  // 5. A Chromium --app=URL window.
+  var appUrl = exec.match(/--app=(?:"([^"]*)"|'([^']*)'|(\S+))/);
+  if (appUrl) {
+    var slug3 = stripProfileTail(chromiumWebAppClass(appUrl[1] || appUrl[2] || appUrl[3] || "", ""));
+    if (slug3) return wildcardProfile(slug3, "webapp", "high");
+  }
+
+  // 6. StartupWMClass, when it is not chromium.desktop's unsubstituted
   //    placeholder. Emitted case-insensitively on the first letter, because
   //    spotify.desktop says "spotify" and the live window says "Spotify".
   if (startup && !/^@@/.test(startup)) {
     return { "class": caseInsensitiveFirst(startup), source: "startupClass", confidence: "high" };
   }
 
-  // 6. A reverse-DNS id is nearly always the app-id too (org.gnome.Nautilus).
+  // 7. A reverse-DNS id is nearly always the app-id too (org.gnome.Nautilus).
   if (/^[A-Za-z0-9]+(\.[A-Za-z0-9_-]+){2,}$/.test(id)) {
     return { "class": escapeClassRegex(id), source: "reverseDns", confidence: "medium" };
   }
 
-  // 7. The executable's basename. Right for foot and chromium, wrong for
+  // 8. The executable's basename. Right for foot and chromium, wrong for
   //    anything launched through a wrapper.
-  var argv0 = exec.split(/\s+/)[0] || "";
-  argv0 = argv0.replace(/^.*\//, "").replace(/-(?:stable|bin|git)$/, "");
+  var argv0 = argv0Raw.replace(/-(?:stable|bin|git)$/, "");
   if (argv0) return { "class": escapeClassRegex(argv0), source: "exec", confidence: "low" };
 
-  // 8. The id itself.
+  // 9. The id itself.
   if (id) return { "class": escapeClassRegex(id), source: "id", confidence: "low" };
   return miss;
 }

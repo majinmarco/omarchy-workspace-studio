@@ -445,6 +445,10 @@ test('deriveClass reproduces the classes seen on a real machine', () => {
     [{ id: 'spotify', execString: 'spotify --uri=%u', startupClass: 'spotify' }, '^[Ss]potify$', 'startupClass'],
     [{ id: 'org.gnome.Nautilus', execString: 'nautilus' }, '^org\\.gnome\\.Nautilus$', 'reverseDns'],
     [{ id: 'btop', execString: 'omarchy-launch-tui btop' }, '^org\\.omarchy\\.btop$', 'tui'],
+    // A real Omarchy TUI entry. --app-id is not a Chromium-only flag, so the
+    // terminal rules have to be tried first or this becomes "chrome-TUI".
+    [{ id: 'Docker', execString: 'xdg-terminal-exec --app-id=TUI.tile -e omarchy-launch-docker-tui' },
+      '^TUI\\.tile$', 'tui'],
     // chromium.desktop ships an unsubstituted @@startup_wm_class placeholder,
     // which must never win over the executable name.
     [{ id: 'chromium', execString: '/usr/bin/chromium %U', startupClass: '@@startup_wm_class' }, '^chromium$', 'exec']
@@ -454,6 +458,18 @@ test('deriveClass reproduces the classes seen on a real machine', () => {
     assert.equal(derived.class, expected, entry.id);
     assert.equal(derived.source, source, entry.id);
   }
+});
+
+// --app-id belongs to Chromium AND to xdg-terminal-exec, so the rule that
+// claims it has to know which program it is looking at.
+test('a terminal --app-id is never mistaken for a Chromium web app', () => {
+  const terminal = S.deriveClass({ id: 'x', execString: 'xdg-terminal-exec --app-id=TUI.float -e ncdu' });
+  assert.equal(terminal.class, '^TUI\\.float$');
+  assert.equal(terminal.source, 'tui');
+  const browser = S.deriveClass({ id: 'y', execString: '/usr/bin/chromium --app-id=abcdef' });
+  assert.equal(browser.source, 'appId');
+  // Some other program's --app-id is not claimed by either rule.
+  assert.equal(S.deriveClass({ id: 'z', execString: 'weirdapp --app-id=abcdef' }).source, 'exec');
 });
 
 test('deriveClass tolerates garbage and reports no confidence', () => {
