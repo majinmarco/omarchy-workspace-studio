@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "workspaces": [
+    {
+      "id": 1,
+      "name": "",
+      "icon": "󰃖",
+      "iconName": "",
+      "color": "default",
+      "monitor": "",
+      "persistent": false,
+      "default": false,
+      "layout": "",
+      "layoutOpts": {},
+      "advanced": {
+        "gapsIn": null,
+        "gapsOut": null,
+        "borderSize": null,
+        "decorate": null,
+        "noRounding": null,
+        "noBorder": null,
+        "noShadow": null
+      },
+      "apps": [
+        {
+          "label": "browser",
+          "match": {
+            "class": "chromium",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "chromium --profile-directory='Profile 2'",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "",
+      "icon": "",
+      "iconName": "",
+      "color": "default",
+      "monitor": "",
+      "persistent": false,
+      "default": false,
+      "layout": "",
+      "layoutOpts": {},
+      "advanced": {
+        "gapsIn": null,
+        "gapsOut": null,
+        "borderSize": null,
+        "decorate": null,
+        "noRounding": null,
+        "noBorder": null,
+        "noShadow": null
+      },
+      "apps": [
+        {
+          "label": "terminal",
+          "match": {
+            "class": "(foot|org\\.codeberg\\.dnkl\\.foot)",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "foot",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "",
+      "icon": "󰒋",
+      "iconName": "",
+      "color": "default",
+      "monitor": "",
+      "persistent": false,
+      "default": false,
+      "layout": "",
+      "layoutOpts": {},
+      "advanced": {
+        "gapsIn": null,
+        "gapsOut": null,
+        "borderSize": null,
+        "decorate": null,
+        "noRounding": null,
+        "noBorder": null,
+        "noShadow": null
+      },
+      "apps": [
+        {
+          "label": "Amazon WorkSpaces",
+          "match": {
+            "class": "chrome-dlijmjnakehgcjngafdkneaigmfcdmhf-Profile_2",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "chromium --profile-directory='Profile 2' --app-id=dlijmjnakehgcjngafdkneaigmfcdmhf",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "",
+      "icon": "󰊌",
+      "iconName": "",
+      "color": "default",
+      "monitor": "",
+      "persistent": false,
+      "default": false,
+      "layout": "",
+      "layoutOpts": {},
+      "advanced": {
+        "gapsIn": null,
+        "gapsOut": null,
+        "borderSize": null,
+        "decorate": null,
+        "noRounding": null,
+        "noBorder": null,
+        "noShadow": null
+      },
+      "apps": [
+        {
+          "label": "Slack",
+          "match": {
+            "class": "chrome-app\\.slack\\.com__client_T681EDZRV_-Profile_2",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "chromium --profile-directory='Profile 2' --app=https://app.slack.com/client/T681EDZRV/",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        },
+        {
+          "label": "WhatsApp",
+          "match": {
+            "class": "chrome-web\\.whatsapp\\.com__-Profile_2",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "chromium --profile-directory='Profile 2' --app=https://web.whatsapp.com/",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "",
+      "icon": "󰙴",
+      "iconName": "",
+      "color": "default",
+      "monitor": "",
+      "persistent": false,
+      "default": false,
+      "layout": "",
+      "layoutOpts": {},
+      "advanced": {
+        "gapsIn": null,
+        "gapsOut": null,
+        "borderSize": null,
+        "decorate": null,
+        "noRounding": null,
+        "noBorder": null,
+        "noShadow": null
+      },
+      "apps": [
+        {
+          "label": "Claude",
+          "match": {
+            "class": "chrome-claude\\.ai__-Profile_2",
+            "title": "",
+            "initialClass": "",
+            "initialTitle": ""
+          },
+          "launch": {
+            "mode": "onCreatedEmpty",
+            "launcher": "",
+            "command": "chromium --profile-directory='Profile 2' --app=https://claude.ai/",
+            "args": "",
+            "delaySec": 0
+          },
+          "rules": {
+            "float": null,
+            "size": "",
+            "move": "",
+            "silent": false
+          }
+        }
+      ]
+    }
+  ],
+  "launchers": {},
+  "binds": {
+    "enabled": true,
+    "focusMods": "SUPER",
+    "moveMods": "SUPER + SHIFT",
+    "moveSilentMods": "SUPER + SHIFT + ALT",
+    "keysyms": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "0",
+      "minus",
+      "equal"
+    ],
+    "unbindUnused": false
+  },
+  "apply": {
+    "reloadMode": "config-only",
+    "landOn": 0
+  }
+}

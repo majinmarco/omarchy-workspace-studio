@@ -8,12 +8,21 @@ import vm from 'node:vm';
 
 const here = new URL('.', import.meta.url);
 
-export function loadSandbox() {
+export function loadSandbox(options) {
   const sandbox = {};
   vm.createContext(sandbox);
-  for (const name of ['Config.js', 'HyprGen.js', 'Import.js']) {
+  for (const name of ['Config.js', 'HyprGen.js', 'Layout.js', 'Import.js', 'AppSearch.js']) {
     const source = fs.readFileSync(new URL('../' + name, here), 'utf8');
     vm.runInContext(source, sandbox, { filename: name });
+  }
+  // QML gives each .js resource its own scope, so Config and HyprGen are handed
+  // the layout module explicitly — exactly what Studio.qml does on startup.
+  // Here every script shares one scope, so the sandbox itself IS the module,
+  // and the two injectors have different names so neither shadows the other.
+  // Tests that want the un-injected fallback call loadSandbox({ layout: false }).
+  if (!options || options.layout !== false) {
+    sandbox.useLayout(sandbox);
+    sandbox.useLayoutModule(sandbox);
   }
   return sandbox;
 }

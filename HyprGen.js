@@ -13,7 +13,7 @@
 // untrusted value into the output without it; adding one is a security bug.
 
 var GENERATOR_NAME = "workspace-studio";
-var GENERATOR_VERSION = "0.1.0";
+var GENERATOR_VERSION = "0.2.0";
 
 var GENERATED_PATH = "~/.local/state/omarchy/toggles/hypr/zz-workspace-studio.lua";
 var CONFIG_PATH = "~/.config/omarchy/workspace-studio.json";
@@ -25,6 +25,30 @@ var STOCK_WORKSPACE_COUNT = 10;
 var STOCK_KEYSYMS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "minus", "equal"];
 
 var WRAP_COLUMN = 100;
+
+// Hyprland accepts `layout = "bogus"` and `layout_opts = { bogus_opt = 1 }`
+// without a word of complaint — layout_opts is a bare string map — and then
+// does nothing. A typo would otherwise be a silent no-op with no error
+// anywhere, so the generator refuses what the compositor will not.
+var EMITTABLE_LAYOUTS = ["dwindle", "master", "scrolling"];
+var LAYOUT_OPT_KEYS = [
+  "orientation", "mfact", "force_split", "default_split_ratio",
+  "split_bias", "slave_count_for_center_master", "column_width"
+];
+var MASTER_ORIENTATIONS = ["left", "right", "top", "bottom", "center"];
+
+// The slicing-tree maths lives in Layout.js. QML gives each .js resource its
+// own scope, so it is handed over explicitly (Studio.qml, Component.onCompleted).
+// With no module injected the generator emits nothing for an arrangement, which
+// is byte-identical to v0.1 — the safe direction to fail in.
+//
+// Named apart from Config.useLayout because node:vm runs both scripts in one
+// shared scope and the later definition would otherwise shadow the earlier.
+var layoutModule = null;
+
+function useLayoutModule(module) {
+  layoutModule = module || null;
+}
 
 // -------------------------------------------------------------- quoting
 
@@ -117,9 +141,20 @@ function workspaceList(config) {
   return config && isArray(config.workspaces) ? config.workspaces : [];
 }
 
-// Resolve an app's launch command, expanding a shared launcher prefix.
+// Resolve an app's launch command. Three tiers, manual first so the escape
+// hatch always wins:
+//
+//   1. app.launch.command   a typed command, used verbatim
+//   2. app.launch.launcher  a shared prefix from config.launchers, plus args
+//   3. app.desktop.id       gtk-launch '<id>.desktop'
+//
+// Config.resolveCommand implements the identical ladder; the two must agree or
+// validate() and this generator disagree about whether an app has a command.
 function commandFor(config, app) {
   if (!app || !app.launch) return "";
+  var direct = app.launch.command ? String(app.launch.command) : "";
+  if (direct) return direct;
+
   var launchers = config && isObject(config.launchers) ? config.launchers : {};
   var id = app.launch.launcher || "";
   if (id && launchers[id] && launchers[id].command) {
@@ -127,7 +162,109 @@ function commandFor(config, app) {
     var args = app.launch.args ? String(app.launch.args) : "";
     return args ? prefix + " " + args : prefix;
   }
-  return app.launch.command ? String(app.launch.command) : "";
+
+  return hyprDesktopCommand(app);
+}
+
+// `uwsm app <id>` rejects desktop ids containing spaces, and this machine has
+// "Google Maps.desktop"; `gtk-launch` is what the Omarchy launcher itself uses
+// for exactly that reason (AppLibrary.qml:81-86). The whole thing still goes
+// through o.launch(), so the generated file stays honest about the wrapper.
+//
+// The id is quoted for the SHELL here; luaQuote then quotes the result for Lua.
+// Two different layers, two different escapes.
+function hyprDesktopCommand(app) {
+  if (!app || !isObject(app.desktop) || !app.desktop.id) return "";
+  var id = String(app.desktop.id);
+  if (/['\n\r]/.test(id) || id.indexOf("/") !== -1) return "";
+  for (var i = 0; i < id.length; i++) {
+    var code = id.charCodeAt(i);
+    if (code < 0x20 || code === 0x7f) return "";
+  }
+  return "gtk-launch " + hyprShellQuoteSingle(id + ".desktop");
+}
+
+function hyprShellQuoteSingle(value) {
+  return "'" + String(value === undefined || value === null ? "" : value).replace(/'/g, "'\\''") + "'";
+}
+
+// ---------------------------------------------------------- layout mapping
+
+function isEmittableLayout(name) {
+  var text = String(name || "");
+  for (var i = 0; i < EMITTABLE_LAYOUTS.length; i++) if (EMITTABLE_LAYOUTS[i] === text) return true;
+  return false;
+}
+
+// Drops anything outside the whitelist, and anything the named option cannot
+// legally hold. Returns a fresh object; never throws.
+function filterLayoutOpts(raw) {
+  var out = {};
+  if (!isObject(raw)) return out;
+  for (var key in raw) {
+    if (!Object.prototype.hasOwnProperty.call(raw, key)) continue;
+    var allowed = false;
+    for (var i = 0; i < LAYOUT_OPT_KEYS.length; i++) if (LAYOUT_OPT_KEYS[i] === key) allowed = true;
+    if (!allowed) continue;
+
+    var value = raw[key];
+    if (key === "orientation") {
+      var ok = false;
+      for (var j = 0; j < MASTER_ORIENTATIONS.length; j++) if (MASTER_ORIENTATIONS[j] === String(value)) ok = true;
+      if (!ok) continue;
+      out[key] = String(value);
+      continue;
+    }
+    if (value === true || value === false) { out[key] = value; continue; }
+    var n = Number(value);
+    if (isFinite(n) && String(value).replace(/\s/g, "") !== "") { out[key] = n; continue; }
+  }
+  return out;
+}
+
+// What the compositor should be told about a workspace's arrangement, or null.
+// An explicit layout choice on the workspace always beats the canvas.
+function arrangementLayout(workspace) {
+  if (!layoutModule || typeof layoutModule.toWorkspaceLayout !== "function") return null;
+  if (!isObject(workspace) || !isObject(workspace.arrangement)) return null;
+  if (workspace.arrangement.mode !== "tiled") return null;
+  if (workspace.layout) return null;
+  var projected = layoutModule.toWorkspaceLayout(workspace.arrangement.root);
+  if (!projected || !isEmittableLayout(projected.layout)) return null;
+  return { layout: projected.layout, layoutOpts: filterLayoutOpts(projected.layoutOpts) };
+}
+
+// app index -> { float, size, move } from the canvas, for mode "float" only.
+// The first leaf wins when an app appears twice: a window rule cannot tell two
+// windows of the same app apart, so the second rectangle is unreachable.
+function arrangementFloatRects(workspace) {
+  var out = {};
+  if (!layoutModule || typeof layoutModule.toFloatRects !== "function") return out;
+  if (!isObject(workspace) || !isObject(workspace.arrangement)) return out;
+  if (workspace.arrangement.mode !== "float") return out;
+  var rects = layoutModule.toFloatRects(workspace.arrangement.root, workspace.arrangement.topReservePct);
+  if (!isArray(rects)) return out;
+  for (var i = 0; i < rects.length; i++) {
+    var r = rects[i];
+    var index = parseInt(r.app, 10);
+    if (!isFinite(index) || index < 0) continue;
+    if (out[index] !== undefined) continue;
+    out[index] = {
+      size: pct(r.wPct) + " " + pct(r.hPct),
+      move: pct(r.xPct) + " " + pct(r.yPct)
+    };
+  }
+  return out;
+}
+
+// Percentages reach Lua as a quoted string ("50% 92%"), so the number itself
+// is rebuilt from a parsed float and can never carry anything but digits.
+function pct(value) {
+  var n = Number(value);
+  if (!isFinite(n)) n = 0;
+  if (n < 0) n = 0;
+  if (n > 100) n = 100;
+  return String(Math.round(n * 100) / 100) + "%";
 }
 
 // `o.launch(cmd)` prefixes uwsm-app so GUI processes land in the right systemd
@@ -183,18 +320,24 @@ function workspaceRuleFields(config, workspace) {
   if (workspace.monitor) fields.push(["monitor", luaQuote(workspace.monitor)]);
   if (workspace.persistent) fields.push(["persistent", luaBool(true)]);
   if (workspace["default"]) fields.push(["default", luaBool(true)]);
-  if (workspace.layout) fields.push(["layout", luaQuote(workspace.layout)]);
+  var derived = arrangementLayout(workspace);
+  var layoutName = workspace.layout || (derived ? derived.layout : "");
+  var layoutOpts = workspace.layout
+    ? filterLayoutOpts(workspace.layoutOpts)
+    : (derived ? derived.layoutOpts : {});
 
-  if (workspace.layout && isObject(workspace.layoutOpts)) {
+  if (layoutName && isEmittableLayout(layoutName)) {
+    fields.push(["layout", luaQuote(layoutName)]);
+
     var optKeys = [];
-    for (var key in workspace.layoutOpts) {
-      if (Object.prototype.hasOwnProperty.call(workspace.layoutOpts, key)) optKeys.push(key);
+    for (var key in layoutOpts) {
+      if (Object.prototype.hasOwnProperty.call(layoutOpts, key)) optKeys.push(key);
     }
     optKeys.sort();
     if (optKeys.length) {
       var opts = [];
       for (var i = 0; i < optKeys.length; i++) {
-        var value = workspace.layoutOpts[optKeys[i]];
+        var value = layoutOpts[optKeys[i]];
         var rendered = value === true || value === false
           ? luaBool(value)
           : (typeof value === "number" ? luaNumber(value) : luaQuote(value));
@@ -246,6 +389,8 @@ function windowRuleLines(config) {
   var list = workspaceList(config);
   for (var i = 0; i < list.length; i++) {
     var workspace = list[i];
+    // Layered UNDER app.rules below, so a hand-typed size still wins.
+    var floats = arrangementFloatRects(workspace);
     for (var a = 0; a < workspace.apps.length; a++) {
       var app = workspace.apps[a];
       var match = [];
@@ -264,11 +409,14 @@ function windowRuleLines(config) {
         ["match", "{ " + match.join(", ") + " }"],
         ["workspace", luaQuote(target)]
       ];
+      var placed = floats[a];
       if (app.rules) {
-        if (app.rules.float === true) fields.push(["float", luaBool(true)]);
+        if (app.rules.float === true || (placed && app.rules.float !== false)) fields.push(["float", luaBool(true)]);
         else if (app.rules.float === false) fields.push(["tile", luaBool(true)]);
-        if (app.rules.size) fields.push(["size", luaQuote(app.rules.size)]);
-        if (app.rules.move) fields.push(["move", luaQuote(app.rules.move)]);
+        var size = app.rules.size || (placed && app.rules.float !== false ? placed.size : "");
+        var move = app.rules.move || (placed && app.rules.float !== false ? placed.move : "");
+        if (size) fields.push(["size", luaQuote(size)]);
+        if (move) fields.push(["move", luaQuote(move)]);
       }
       if (workspace.monitor) fields.push(["monitor", luaQuote(workspace.monitor)]);
 

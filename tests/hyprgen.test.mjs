@@ -402,3 +402,245 @@ test('diffLines handles an empty before-file (first apply)', () => {
   assert.equal(stats.removed, 0);
   assert.ok(stats.added > 0);
 });
+
+// -------------------------------------------------- command precedence
+
+function appConfig(app, extra) {
+  return S.normalize(Object.assign({
+    workspaces: [{ id: 1, name: 'w', apps: [app] }]
+  }, extra || {}));
+}
+
+test('commandFor puts a typed command first, then a launcher, then a picked entry', () => {
+  const launchers = { chromium: { command: 'chromium --profile-directory=X' } };
+
+  const all = appConfig({
+    match: { class: 'x' },
+    desktop: { id: 'Slack' },
+    launch: { mode: 'onCreatedEmpty', launcher: 'chromium', args: '--app=y', command: 'foot' }
+  }, { launchers: launchers });
+  assert.equal(S.commandFor(all, all.workspaces[0].apps[0]), 'foot');
+
+  const withLauncher = appConfig({
+    match: { class: 'x' },
+    desktop: { id: 'Slack' },
+    launch: { mode: 'onCreatedEmpty', launcher: 'chromium', args: '--app=y' }
+  }, { launchers: launchers });
+  assert.equal(S.commandFor(withLauncher, withLauncher.workspaces[0].apps[0]), 'chromium --profile-directory=X --app=y');
+
+  const picked = appConfig({
+    match: { class: 'x' },
+    desktop: { id: 'Slack' },
+    launch: { mode: 'onCreatedEmpty' }
+  });
+  assert.equal(S.commandFor(picked, picked.workspaces[0].apps[0]), "gtk-launch 'Slack.desktop'");
+
+  const nothing = appConfig({ match: { class: 'x' } });
+  assert.equal(S.commandFor(nothing, nothing.workspaces[0].apps[0]), '');
+});
+
+// If these two ever disagree, validate() and the generator disagree about
+// whether an app has a command, and Apply silently does nothing.
+test('commandFor and Config.resolveCommand agree on every combination', () => {
+  const launchers = { l: { command: 'prefix' } };
+  for (const command of ['', 'foot']) {
+    for (const launcher of ['', 'l', 'missing']) {
+      for (const id of ['', 'Slack']) {
+        const config = appConfig({
+          match: { class: 'x' },
+          desktop: id ? { id: id } : undefined,
+          launch: { mode: 'onCreatedEmpty', launcher: launcher, args: 'a', command: command }
+        }, { launchers: launchers });
+        const app = config.workspaces[0].apps[0];
+        assert.equal(S.commandFor(config, app), S.resolveCommand(config, app),
+          JSON.stringify({ command, launcher, id }));
+      }
+    }
+  }
+});
+
+test('a desktop id containing a space is quoted for the shell inside the Lua string', () => {
+  const lua = S.toLua(appConfig({
+    match: { class: 'x' },
+    desktop: { id: 'Google Maps' },
+    launch: { mode: 'onCreatedEmpty' }
+  }));
+  assert.ok(lua.includes(`o.launch("gtk-launch 'Google Maps.desktop'")`), lua);
+});
+
+test('an id that survived normalization can still not break out of the quoting', () => {
+  // Config refuses these outright; the generator refuses them again on the way
+  // out, because a second independent boundary is the whole point.
+  for (const id of ["a'b", 'a\nb', 'a b', 'a/b']) {
+    assert.equal(S.commandFor({}, { launch: { mode: 'onCreatedEmpty' }, desktop: { id: id } }), '');
+  }
+});
+
+// ---------------------------------------------------- arrangement -> Lua
+
+function arranged(mode, root, extra) {
+  return S.normalize(Object.assign({
+    workspaces: [{
+      id: 1,
+      name: 'w',
+      apps: [
+        { label: 'a', match: { class: '^a$' } },
+        { label: 'b', match: { class: '^b$' } }
+      ],
+      arrangement: { mode: mode, root: root }
+    }]
+  }, extra || {}));
+}
+
+const TWO_UP = { dir: 'h', ratio: 0.6, kids: [{ app: 0 }, { app: 1 }] };
+
+test('tiled mode emits layout and layout_opts, and no geometry', () => {
+  const lua = S.toLua(arranged('tiled', TWO_UP));
+  assert.ok(lua.includes('layout = "master"'), lua);
+  assert.ok(/layout_opts = \{ mfact = 0\.6, orientation = "left" \}/.test(lua), lua);
+  assert.equal(lua.indexOf('float = true'), -1);
+  assert.equal(lua.indexOf('size ='), -1);
+  assert.equal(lua.indexOf('move ='), -1);
+});
+
+test('float mode emits percentages on the window rules, and no layout', () => {
+  const lua = S.toLua(arranged('float', TWO_UP));
+  assert.ok(lua.includes('float = true'), lua);
+  assert.ok(lua.includes('size = "60% 100%"'), lua);
+  assert.ok(lua.includes('move = "0% 0%"'), lua);
+  assert.ok(lua.includes('size = "40% 100%"'), lua);
+  assert.ok(lua.includes('move = "60% 0%"'), lua);
+  assert.equal(lua.indexOf('layout ='), -1);
+});
+
+test('float mode leaves room for the bar when the workspace asks for it', () => {
+  const config = S.normalize({
+    workspaces: [{
+      id: 1, name: 'w',
+      apps: [{ label: 'a', match: { class: '^a$' } }],
+      arrangement: { mode: 'float', root: { app: 0 }, topReservePct: 4 }
+    }]
+  });
+  const lua = S.toLua(config);
+  assert.ok(lua.includes('size = "100% 96%"'), lua);
+  assert.ok(lua.includes('move = "0% 4%"'), lua);
+});
+
+test('an explicit workspace layout beats the tree-derived one', () => {
+  const lua = S.toLua(S.normalize({
+    workspaces: [{
+      id: 1, name: 'w', layout: 'dwindle',
+      apps: [{ label: 'a', match: { class: '^a$' } }, { label: 'b', match: { class: '^b$' } }],
+      arrangement: { mode: 'tiled', root: TWO_UP }
+    }]
+  }));
+  assert.ok(lua.includes('layout = "dwindle"'), lua);
+  assert.equal(lua.indexOf('master'), -1);
+});
+
+test('an explicit app size beats the tree-derived rectangle', () => {
+  const lua = S.toLua(S.normalize({
+    workspaces: [{
+      id: 1, name: 'w',
+      apps: [
+        { label: 'a', match: { class: '^a$' }, rules: { size: '800 600' } },
+        { label: 'b', match: { class: '^b$' } }
+      ],
+      arrangement: { mode: 'float', root: TWO_UP }
+    }]
+  }));
+  assert.ok(lua.includes('size = "800 600"'), lua);
+  assert.equal(lua.indexOf('size = "60% 100%"'), -1);
+  // The other app still gets its rectangle.
+  assert.ok(lua.includes('size = "40% 100%"'), lua);
+});
+
+test('an app explicitly tiled is never floated by the canvas', () => {
+  const lua = S.toLua(S.normalize({
+    workspaces: [{
+      id: 1, name: 'w',
+      apps: [{ label: 'a', match: { class: '^a$' }, rules: { float: false } }],
+      arrangement: { mode: 'float', root: { app: 0 } }
+    }]
+  }));
+  assert.ok(lua.includes('tile = true'), lua);
+  assert.equal(lua.indexOf('float = true'), -1);
+  assert.equal(lua.indexOf('%"'), -1);
+});
+
+test('mode "none" generates exactly what v0.1 generated', () => {
+  const before = S.toLua(S.normalize({
+    workspaces: [{ id: 1, name: 'w', apps: [{ label: 'a', match: { class: '^a$' } }] }]
+  }));
+  const after = S.toLua(S.normalize({
+    workspaces: [{
+      id: 1, name: 'w', apps: [{ label: 'a', match: { class: '^a$' } }],
+      arrangement: { mode: 'none', root: { app: 0 } }
+    }]
+  }));
+  assert.equal(after, before);
+});
+
+// Hyprland accepts a bogus layout name and a bogus layout_opts key without a
+// word of complaint and then does nothing, so the generator has to catch them.
+test('a layout name outside the whitelist is refused', () => {
+  const lua = S.toLua(S.normalize({ workspaces: [{ id: 1, name: 'w', layout: 'bogus' }] }));
+  assert.equal(lua.indexOf('bogus'), -1);
+  assert.equal(lua.indexOf('layout ='), -1);
+});
+
+test('a layout_opts key outside the whitelist is refused', () => {
+  const lua = S.toLua(S.normalize({
+    workspaces: [{ id: 1, name: 'w', layout: 'master', layoutOpts: { mfact: 0.7, bogus_opt: 1, drop_at_cursor: true } }]
+  }));
+  assert.ok(lua.includes('mfact = 0.7'), lua);
+  assert.equal(lua.indexOf('bogus_opt'), -1);
+  assert.equal(lua.indexOf('drop_at_cursor'), -1);
+});
+
+test('an orientation Hyprland does not have is refused', () => {
+  const lua = S.toLua(S.normalize({
+    workspaces: [{ id: 1, name: 'w', layout: 'master', layoutOpts: { orientation: 'diagonal' } }]
+  }));
+  assert.equal(lua.indexOf('diagonal'), -1);
+  for (const good of ['left', 'right', 'top', 'bottom', 'center']) {
+    const ok = S.toLua(S.normalize({
+      workspaces: [{ id: 1, name: 'w', layout: 'master', layoutOpts: { orientation: good } }]
+    }));
+    assert.ok(ok.includes('orientation = "' + good + '"'), good);
+  }
+});
+
+test('an arrangement generates the same bytes every time', () => {
+  const config = arranged('float', TWO_UP);
+  assert.equal(S.toLua(config), S.toLua(config));
+  assert.equal(S.toLua(S.normalize(config)), S.toLua(config));
+});
+
+test('injection payloads stay inert with a desktop entry and an arrangement present', () => {
+  for (const payload of INJECTIONS) {
+    const cfg = S.normalize({
+      workspaces: [{
+        id: 1,
+        name: payload,
+        apps: [{
+          label: payload,
+          match: { class: payload },
+          desktop: { id: payload, name: payload, icon: payload },
+          launch: { mode: 'onCreatedEmpty' }
+        }],
+        arrangement: { mode: 'float', root: { app: 0 } }
+      }]
+    });
+    const lua = S.toLua(cfg);
+    for (const line of lua.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed === '' || trimmed.indexOf('--') === 0) continue;
+      assert.match(trimmed, /^(hl\.|o\.|\}|[a-z_]+ = |"|\{)/, trimmed);
+    }
+    // The payload text itself does appear — as inert data inside a quoted
+    // string literal, with every quote and backslash escaped. What must never
+    // happen is it reaching statement position, and that is exactly what the
+    // line-shape check above rules out.
+  }
+});

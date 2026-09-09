@@ -22,6 +22,26 @@ var RELOAD_MODES = ["config-only", "full", "eval-only"];
 var COLORS = ["default", "accent", "urgent"];
 var MATCH_KEYS = ["class", "title", "initialClass", "initialTitle"];
 
+// Which rule in deriveClass() produced app.match.class. Stored so the editor
+// can show how much to trust it, and so a class the user edited by hand is
+// never silently overwritten by a later pick.
+var CLASS_SOURCES = ["", "startupClass", "webapp", "appId", "tui", "reverseDns", "exec", "id", "manual"];
+
+// How the canvas asks the compositor to arrange a workspace.
+//   none   emit nothing at all, and omit the key entirely on serialize
+//   tiled  project the tree onto hl.workspace_rule layout / layout_opts
+//   float  emit every leaf's rectangle as float + size% + move% window rules
+var LAYOUT_MODES = ["none", "tiled", "float"];
+
+// Hyprland validates neither layout names nor layout_opts keys: `layout =
+// "bogus"` and `layout_opts = { bogus_opt = 1 }` both pass --verify-config and
+// then do nothing, with no error anywhere. So the whitelist has to live here.
+var LAYOUT_OPT_KEYS = [
+  "orientation", "mfact", "force_split", "default_split_ratio",
+  "split_bias", "slave_count_for_center_master", "column_width"
+];
+var MASTER_ORIENTATIONS = ["left", "right", "top", "bottom", "center"];
+
 // Keysyms only. Hyprland 0.56.2 silently drops "code:NN" bind keycodes: they
 // land in the bind table with key="" / keycode=0 and then match on the
 // modifier mask alone, firing every bind that shares that mask. See README.
@@ -91,6 +111,21 @@ function cloneJson(value) {
   } catch (error) {
     return null;
   }
+}
+
+// ------------------------------------------------------------ layout module
+//
+// The slicing-tree maths lives in Layout.js, and QML gives each .js resource
+// its own scope, so it has to be handed over explicitly the way Import.js is
+// handed this module (Studio.qml, Component.onCompleted).
+//
+// The fallback matters: with no module injected, an arrangement is PRESERVED
+// verbatim rather than validated or dropped, so a host that forgets to wire it
+// up (the bar widget, which only ever reads) can never destroy the user's tree.
+var layoutApi = null;
+
+function useLayout(module) {
+  layoutApi = module || null;
 }
 
 // ---------------------------------------------------------------- defaults
@@ -202,6 +237,30 @@ function normalizeAppRules(raw) {
   return out;
 }
 
+// The desktop entry an app was picked from. Optional and additive: absent in
+// every document written before v0.2, and returned as `undefined` rather than
+// null so JSON.stringify drops the key instead of writing "desktop": null.
+//
+// `id` is single-quoted into a shell command on the way out (gtk-launch), so
+// the characters that could break out of that quoting are rejected here rather
+// than escaped — a rejected id surfaces in the editor, a mangled one does not.
+function normalizeDesktop(raw) {
+  if (!isObject(raw)) return undefined;
+
+  var id = cleanString(raw.id, 128);
+  if (id.slice(-8) === ".desktop") id = id.slice(0, -8);
+  if (!id) return undefined;
+  if (id.indexOf("/") !== -1 || id.indexOf("..") !== -1 || id.indexOf("'") !== -1) return undefined;
+
+  var out = { id: id, name: cleanString(raw.name, 128), icon: "", classSource: "" };
+
+  var icon = cleanString(raw.icon, 128);
+  if (icon && (/^[A-Za-z0-9._+-]+$/.test(icon) || icon.charAt(0) === "/")) out.icon = icon;
+
+  out.classSource = oneOf(raw.classSource, CLASS_SOURCES, "");
+  return out;
+}
+
 function normalizeApp(raw) {
   var app = defaultApp();
   if (!isObject(raw)) return app;
@@ -209,7 +268,40 @@ function normalizeApp(raw) {
   app.match = normalizeMatch(raw.match);
   app.launch = normalizeLaunch(raw.launch);
   app.rules = normalizeAppRules(raw.rules);
+  var desktop = normalizeDesktop(raw.desktop);
+  if (desktop) app.desktop = desktop;
   return app;
+}
+
+// The canvas's arrangement for one workspace. Additive and omitted entirely
+// while the mode is "none", which is what keeps every pre-v0.2 document
+// byte-identical through parse -> serialize.
+//
+// NOTE ON THE KEY NAME: the v0.2 analysis called this `workspace.layout`, but
+// that name was already taken by the layout-name string ("dwindle" / "master")
+// that every existing document carries. The two have to coexist — an explicit
+// layout choice deliberately beats the canvas — so the canvas's data lives
+// under `arrangement`.
+function normalizeArrangement(raw, appCount) {
+  if (!isObject(raw)) return undefined;
+  var mode = oneOf(raw.mode, LAYOUT_MODES, "none");
+  if (mode === "none") return undefined;
+
+  var reserve = clampReal(raw.topReservePct, 0, 50, 0);
+  reserve = Math.round(reserve * 100) / 100;
+
+  var root = null;
+  if (layoutApi && typeof layoutApi.normalizeTree === "function") {
+    root = layoutApi.normalizeTree(raw.root, appCount);
+  } else {
+    // No module: preserve rather than validate. Losing the user's drawing
+    // because a host forgot one wiring call would be much worse than carrying
+    // an unvalidated tree through a read-only path.
+    root = cloneJson(raw.root);
+  }
+  if (!root) return undefined;
+
+  return { mode: mode, root: root, topReservePct: reserve };
 }
 
 function normalizeLayoutOpts(raw) {
@@ -258,6 +350,9 @@ function normalizeWorkspace(raw, fallbackId) {
   if (isArray(raw.apps)) {
     for (var i = 0; i < raw.apps.length; i++) ws.apps.push(normalizeApp(raw.apps[i]));
   }
+  // After the apps, because a leaf pointing past the end of apps[] is clamped.
+  var arrangement = normalizeArrangement(raw.arrangement, ws.apps.length);
+  if (arrangement) ws.arrangement = arrangement;
   return ws;
 }
 
@@ -420,17 +515,48 @@ function appHasMatch(app) {
   return false;
 }
 
+// Mirrors HyprGen.commandFor exactly. If these two ever disagree, validate()
+// and the generator disagree about whether an app "has a command", which shows
+// up as an Apply that silently does nothing.
+//
+//   1. a typed command        the manual escape hatch, so it wins outright
+//   2. a shared launcher      prefix + args
+//   3. a picked desktop entry gtk-launch '<id>.desktop'
+//
+// This reorders 1 and 2 relative to v0.1, where a launcher prefix beat a typed
+// command. `launchers` is empty in every document written so far and no UI
+// writes it, so the change is invisible in practice — but it is deliberate.
 function resolveCommand(config, app) {
   if (!app || !app.launch) return "";
-  var launchers = config && isObject(config.launchers) ? config.launchers : {};
-  var prefix = "";
-  if (app.launch.launcher && launchers[app.launch.launcher]) {
-    prefix = String(launchers[app.launch.launcher].command || "");
-  }
-  var args = app.launch.args || "";
   var direct = app.launch.command || "";
-  if (prefix) return args ? prefix + " " + args : prefix;
-  return direct;
+  if (direct) return direct;
+
+  var launchers = config && isObject(config.launchers) ? config.launchers : {};
+  if (app.launch.launcher && launchers[app.launch.launcher] && launchers[app.launch.launcher].command) {
+    var prefix = String(launchers[app.launch.launcher].command);
+    var args = app.launch.args || "";
+    return args ? prefix + " " + args : prefix;
+  }
+
+  return desktopCommand(app);
+}
+
+// `gtk-launch` rather than `uwsm app <id>`: uwsm's desktop-id regex rejects ids
+// containing spaces, and this machine has "Google Maps.desktop". It is also
+// exactly what the Omarchy launcher runs (AppLibrary.qml:85). The .desktop
+// suffix is kept or ids like org.telegram.desktop do not resolve.
+function desktopCommand(app) {
+  if (!app || !isObject(app.desktop) || !app.desktop.id) return "";
+  var id = String(app.desktop.id);
+  // Belt and braces: normalizeDesktop already refuses these, and a smuggled id
+  // must not be able to close the single quote it is about to sit inside.
+  if (/['\n\r\u0000-\u001f]/.test(id) || id.indexOf("/") !== -1) return "";
+  return "gtk-launch " + shellQuoteSingle(id + ".desktop");
+}
+
+// Mirrors the shell's Util.shellQuote (Commons/Util.qml:49-51).
+function shellQuoteSingle(value) {
+  return "'" + String(value === undefined || value === null ? "" : value).replace(/'/g, "'\\''") + "'";
 }
 
 // Returns { ok, errors[], warnings[] }. Errors block Apply; warnings do not.
@@ -496,7 +622,21 @@ function validate(raw) {
         });
       }
       if (app.launch.mode !== "none" && !command) {
-        errors.push({ path: appWhere + ".launch.command", message: "Launch mode needs a command." });
+        errors.push({ path: appWhere + ".launch.command", message: "Launch mode needs a command, or an app picked from the list." });
+      }
+      if (app.desktop && app.desktop.id && app.launch.command) {
+        warnings.push({
+          path: appWhere + ".launch.command",
+          message: "The typed command overrides the picked app for " +
+            (app.label || app.desktop.name || app.desktop.id) + "."
+        });
+      }
+      if (app.desktop && (app.desktop.classSource === "id" || app.desktop.classSource === "exec")) {
+        warnings.push({
+          path: appWhere + ".match.class",
+          message: "The window class for " + (app.label || app.desktop.name || app.desktop.id) +
+            " was guessed. Open it once and press Grab focused window to confirm."
+        });
       }
       if (app.launch.launcher && !config.launchers[app.launch.launcher]) {
         errors.push({ path: appWhere + ".launch.launcher", message: "Unknown launcher '" + app.launch.launcher + "'." });
@@ -516,6 +656,19 @@ function validate(raw) {
       if (app.launch.mode === "autostart" && app.launch.delaySec > 60) {
         warnings.push({ path: appWhere + ".launch.delaySec", message: "A delay over a minute is probably a mistake." });
       }
+    }
+
+    if (ws.arrangement && ws.arrangement.mode === "tiled" && ws.layout) {
+      warnings.push({
+        path: where + ".layout",
+        message: "Workspace " + ws.id + " has an explicit layout, so the canvas arrangement is not emitted."
+      });
+    }
+    if (ws.arrangement && ws.arrangement.mode === "float") {
+      warnings.push({
+        path: where + ".arrangement",
+        message: "Workspace " + ws.id + " uses exact placement, so its windows float instead of tiling."
+      });
     }
 
     var onCreatedEmpty = 0;
@@ -631,4 +784,155 @@ function escapeClassRegex(value) {
   var text = cleanString(value, 512);
   if (!text) return "";
   return "^" + text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$";
+}
+
+// ------------------------------------------------- desktop entry -> class
+//
+// A window rule matches a Wayland app-id; a desktop entry does not carry one
+// reliably. Of the 74 entries in /usr/share/applications on a stock Omarchy,
+// 20 set StartupWMClass and 54 do not, chromium.desktop ships the
+// unsubstituted placeholder "@@startup_wm_class", a Chromium PWA advertises
+// "crx_<id>" while the compositor sees "chrome-<id>-Profile_N", and every
+// Omarchy webapp entry sets nothing at all.
+//
+// So this is a ladder of rules ordered most-specific first, each one calibrated
+// against a window that was actually open on a real machine, and each one
+// reporting how much it should be trusted. The UI shows the confidence next to
+// "Grab focused window", which is the ground truth whenever this guesses wrong.
+//
+// `entry` is a plain object shaped like a Quickshell DesktopEntry:
+// { id, name, icon, execString, startupClass }.
+function deriveClass(entry) {
+  var miss = { "class": "", source: "", confidence: "" };
+  if (!isObject(entry)) return miss;
+
+  var id = cleanString(entry.id, 128);
+  if (id.slice(-8) === ".desktop") id = id.slice(0, -8);
+  var exec = cleanString(entry.execString, 1024);
+  var startup = cleanString(entry.startupClass, 128);
+
+  // 1. An Omarchy webapp. The profile directory is not knowable from the entry
+  //    (omarchy-launch-webapp passes no --profile-directory and Chromium uses
+  //    `last_used`), so the profile tail is a wildcard — the same shape
+  //    Omarchy's own browser.lua rules use.
+  var webapp = exec.match(/^omarchy-launch-webapp\s+(?:"([^"]*)"|'([^']*)'|(\S+))/);
+  if (webapp) {
+    var url = webapp[1] || webapp[2] || webapp[3] || "";
+    var slug = stripProfileTail(chromiumWebAppClass(url, ""));
+    if (slug) return wildcardProfile(slug, "webapp", "high");
+  }
+
+  // 2. A Chromium app-id window. NEVER StartupWMClass here: it says
+  //    crx_<id>, which is not what the compositor sees.
+  var appId = exec.match(/--app-id=([A-Za-z0-9]+)/);
+  if (appId) return wildcardProfile("chrome-" + appId[1], "appId", "high");
+
+
+  // 3. A Chromium --app=URL window.
+  var appUrl = exec.match(/--app=(?:"([^"]*)"|'([^']*)'|(\S+))/);
+  if (appUrl) {
+    var slug3 = stripProfileTail(chromiumWebAppClass(appUrl[1] || appUrl[2] || appUrl[3] || "", ""));
+    if (slug3) return wildcardProfile(slug3, "webapp", "high");
+  }
+
+  // 4. A terminal app launched with an explicit app-id, or Omarchy's TUI
+  //    launcher, whose default is org.omarchy.<command>.
+  var explicitAppId = exec.match(/(?:xdg-terminal-exec|omarchy-launch-tui)[^\n]*--app-id=(\S+)/);
+  if (explicitAppId) {
+    return { "class": escapeClassRegex(explicitAppId[1]), source: "tui", confidence: "high" };
+  }
+  var tui = exec.match(/^omarchy-launch-tui\s+(\S+)/);
+  if (tui) {
+    var base = String(tui[1]).replace(/^.*\//, "");
+    return { "class": escapeClassRegex("org.omarchy." + base), source: "tui", confidence: "high" };
+  }
+
+  // 5. StartupWMClass, when it is not chromium.desktop's unsubstituted
+  //    placeholder. Emitted case-insensitively on the first letter, because
+  //    spotify.desktop says "spotify" and the live window says "Spotify".
+  if (startup && !/^@@/.test(startup)) {
+    return { "class": caseInsensitiveFirst(startup), source: "startupClass", confidence: "high" };
+  }
+
+  // 6. A reverse-DNS id is nearly always the app-id too (org.gnome.Nautilus).
+  if (/^[A-Za-z0-9]+(\.[A-Za-z0-9_-]+){2,}$/.test(id)) {
+    return { "class": escapeClassRegex(id), source: "reverseDns", confidence: "medium" };
+  }
+
+  // 7. The executable's basename. Right for foot and chromium, wrong for
+  //    anything launched through a wrapper.
+  var argv0 = exec.split(/\s+/)[0] || "";
+  argv0 = argv0.replace(/^.*\//, "").replace(/-(?:stable|bin|git)$/, "");
+  if (argv0) return { "class": escapeClassRegex(argv0), source: "exec", confidence: "low" };
+
+  // 8. The id itself.
+  if (id) return { "class": escapeClassRegex(id), source: "id", confidence: "low" };
+  return miss;
+}
+
+// chromiumWebAppClass() always appends a profile directory, and "Default" is
+// what it uses when none is given. The real profile is not knowable from a
+// desktop entry — omarchy-launch-webapp passes no --profile-directory and
+// Chromium picks `last_used` — so the tail is removed and wildcarded instead.
+function stripProfileTail(slug) {
+  var text = String(slug || "");
+  return text.slice(-8) === "-Default" ? text.slice(0, -8) : text;
+}
+
+// "chrome-web.whatsapp.com__" -> "^chrome-web\.whatsapp\.com__-.*$".
+// The escape runs first so the wildcard is the only unescaped metacharacter.
+function wildcardProfile(slug, source, confidence) {
+  var escaped = escapeClassRegex(slug);
+  if (!escaped) return { "class": "", source: "", confidence: "" };
+  return {
+    "class": escaped.replace(/\$$/, "-.*$"),
+    source: source,
+    confidence: confidence
+  };
+}
+
+// Hyprland's regex flavour has no portable inline (?i), so only the first
+// letter — which is where the desktop-entry/compositor disagreements live — is
+// widened into a character class.
+function caseInsensitiveFirst(value) {
+  var escaped = escapeClassRegex(value);
+  if (!escaped) return "";
+  var body = escaped.slice(1, escaped.length - 1);
+  var head = body.charAt(0);
+  if (!/[A-Za-z]/.test(head)) return escaped;
+  return "^[" + head.toUpperCase() + head.toLowerCase() + "]" + body.slice(1) + "$";
+}
+
+function classConfidence(source) {
+  switch (String(source)) {
+    case "webapp":
+    case "appId":
+    case "tui":
+    case "startupClass":
+      return "high";
+    case "reverseDns":
+      return "medium";
+    case "exec":
+    case "id":
+      return "low";
+    case "manual":
+      return "manual";
+    default:
+      return "";
+  }
+}
+
+// A short phrase for the badge next to the class field.
+function classSourceLabel(source) {
+  switch (String(source)) {
+    case "webapp": return "from the web app URL";
+    case "appId": return "from the Chromium app id";
+    case "tui": return "from the terminal app id";
+    case "startupClass": return "from StartupWMClass";
+    case "reverseDns": return "from the entry id";
+    case "exec": return "guessed from the command";
+    case "id": return "guessed from the entry id";
+    case "manual": return "you set this";
+    default: return "";
+  }
 }

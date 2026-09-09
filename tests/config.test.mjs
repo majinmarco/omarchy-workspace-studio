@@ -351,3 +351,221 @@ test('config.schema.json documents the shape defaults() produces', () => {
     assert.ok(workspace[key], 'config.schema.json workspace is missing ' + key);
   }
 });
+
+// ------------------------------------------------------ desktop entries
+
+test('normalizeDesktop strips the .desktop suffix and keeps the rest', () => {
+  const desktop = S.normalizeDesktop({ id: 'Slack.desktop', name: 'Slack', icon: 'slack', classSource: 'webapp' });
+  assert.deepEqual(plain(desktop), { id: 'Slack', name: 'Slack', icon: 'slack', classSource: 'webapp' });
+  assert.equal(S.normalizeDesktop({ id: 'Google Maps' }).id, 'Google Maps');
+});
+
+// The id is single-quoted into a gtk-launch command, so these are refused
+// rather than escaped: a rejection is visible, a mangled id is not.
+test('normalizeDesktop refuses an id that could escape its shell quoting', () => {
+  for (const bad of ["it's", '../../etc/passwd', 'a/b', '', '   ', '.desktop']) {
+    assert.equal(S.normalizeDesktop({ id: bad }), undefined, JSON.stringify(bad));
+  }
+});
+
+test('normalizeDesktop drops an icon that is not a name or an absolute path', () => {
+  assert.equal(S.normalizeDesktop({ id: 'x', icon: 'org.gnome.Nautilus' }).icon, 'org.gnome.Nautilus');
+  assert.equal(S.normalizeDesktop({ id: 'x', icon: '/usr/share/pixmaps/a.png' }).icon, '/usr/share/pixmaps/a.png');
+  assert.equal(S.normalizeDesktop({ id: 'x', icon: 'a b; rm -rf' }).icon, '');
+});
+
+test('classSource falls back to empty for an unknown value', () => {
+  assert.equal(S.normalizeDesktop({ id: 'x', classSource: 'astrology' }).classSource, '');
+  assert.equal(S.normalizeDesktop({ id: 'x', classSource: 'manual' }).classSource, 'manual');
+});
+
+test('an app with a picked entry and no command validates', () => {
+  const config = S.normalize({
+    workspaces: [{
+      id: 1,
+      apps: [{
+        label: 'Slack',
+        match: { class: '^slack$' },
+        desktop: { id: 'Slack', name: 'Slack' },
+        launch: { mode: 'onCreatedEmpty' }
+      }]
+    }]
+  });
+  const result = S.validate(config);
+  assert.equal(result.ok, true, JSON.stringify(plain(result.errors)));
+  assert.equal(S.resolveCommand(config, config.workspaces[0].apps[0]), "gtk-launch 'Slack.desktop'");
+});
+
+test('a typed command beats a picked entry, and says so', () => {
+  const config = S.normalize({
+    workspaces: [{
+      id: 1,
+      apps: [{
+        match: { class: 'x' },
+        desktop: { id: 'Slack' },
+        launch: { mode: 'onCreatedEmpty', command: 'slack --startup' }
+      }]
+    }]
+  });
+  assert.equal(S.resolveCommand(config, config.workspaces[0].apps[0]), 'slack --startup');
+  const warnings = S.validate(config).warnings.map(w => w.message).join(' ');
+  assert.match(warnings, /typed command overrides the picked app/);
+});
+
+test('a low-confidence class raises a warning naming the fix', () => {
+  const config = S.normalize({
+    workspaces: [{ id: 1, apps: [{ label: 'Thing', match: { class: '^thing$' }, desktop: { id: 'thing', classSource: 'id' } }] }]
+  });
+  const warnings = S.validate(config).warnings.map(w => w.message).join(' ');
+  assert.match(warnings, /was guessed/);
+  assert.match(warnings, /Grab focused window/);
+});
+
+test('a typed command still wins over a shared launcher', () => {
+  const config = S.normalize({
+    launchers: { chromium: { command: 'chromium --profile-directory=X' } },
+    workspaces: [{ id: 1, apps: [{ match: { class: 'x' }, launch: { mode: 'autostart', launcher: 'chromium', command: 'foot' } }] }]
+  });
+  assert.equal(S.resolveCommand(config, config.workspaces[0].apps[0]), 'foot');
+});
+
+// --------------------------------------------------------- class derivation
+
+test('deriveClass reproduces the classes seen on a real machine', () => {
+  const cases = [
+    [{ id: 'WhatsApp', execString: 'omarchy-launch-webapp https://web.whatsapp.com/' },
+      '^chrome-web\\.whatsapp\\.com__-.*$', 'webapp'],
+    [{ id: 'Slack', execString: 'omarchy-launch-webapp "https://app.slack.com/client/T681EDZRV/"' },
+      '^chrome-app\\.slack\\.com__client_T681EDZRV_-.*$', 'webapp'],
+    [{ id: 'ws', execString: '/usr/bin/chromium "--profile-directory=Profile 2" --app-id=dlijmjnakehgcjngafdkneaigmfcdmhf', startupClass: 'crx_dlijmjnakehgcjngafdkneaigmfcdmhf' },
+      '^chrome-dlijmjnakehgcjngafdkneaigmfcdmhf-.*$', 'appId'],
+    [{ id: 'claude', execString: 'chromium --app=https://claude.ai/' },
+      '^chrome-claude\\.ai__-.*$', 'webapp'],
+    [{ id: 'foot', execString: 'foot', startupClass: 'foot' }, '^[Ff]oot$', 'startupClass'],
+    [{ id: 'spotify', execString: 'spotify --uri=%u', startupClass: 'spotify' }, '^[Ss]potify$', 'startupClass'],
+    [{ id: 'org.gnome.Nautilus', execString: 'nautilus' }, '^org\\.gnome\\.Nautilus$', 'reverseDns'],
+    [{ id: 'btop', execString: 'omarchy-launch-tui btop' }, '^org\\.omarchy\\.btop$', 'tui'],
+    // chromium.desktop ships an unsubstituted @@startup_wm_class placeholder,
+    // which must never win over the executable name.
+    [{ id: 'chromium', execString: '/usr/bin/chromium %U', startupClass: '@@startup_wm_class' }, '^chromium$', 'exec']
+  ];
+  for (const [entry, expected, source] of cases) {
+    const derived = S.deriveClass(entry);
+    assert.equal(derived.class, expected, entry.id);
+    assert.equal(derived.source, source, entry.id);
+  }
+});
+
+test('deriveClass tolerates garbage and reports no confidence', () => {
+  for (const junk of [null, undefined, 0, 'nope', [], {}]) {
+    const derived = S.deriveClass(junk);
+    assert.equal(derived.class, '');
+    assert.equal(derived.confidence, '');
+  }
+});
+
+test('the derived class is always an anchored regex a rule can use', () => {
+  for (const entry of [
+    { id: 'a.b.c', execString: 'x' },
+    { id: 'foot', startupClass: 'foot' },
+    { id: 'x', execString: 'omarchy-launch-webapp https://a.example/b' }
+  ]) {
+    const derived = S.deriveClass(entry);
+    assert.match(derived.class, /^\^/);
+    assert.match(derived.class, /\$$/);
+    assert.ok(['high', 'medium', 'low'].indexOf(derived.confidence) !== -1);
+    assert.equal(S.classConfidence(derived.source), derived.confidence);
+    assert.notEqual(S.classSourceLabel(derived.source), '');
+  }
+});
+
+test('shellQuoteSingle survives an apostrophe', () => {
+  assert.equal(S.shellQuoteSingle('Google Maps'), "'Google Maps'");
+  assert.equal(S.shellQuoteSingle("it's"), "'it'\\''s'");
+});
+
+// -------------------------------------------------------- the arrangement
+
+test('an arrangement normalizes, clamps and survives a round trip', () => {
+  const config = S.normalize({
+    workspaces: [{
+      id: 1,
+      apps: [{ match: { class: 'a' } }, { match: { class: 'b' } }],
+      arrangement: { mode: 'tiled', root: { dir: 'h', ratio: 4, kids: [{ app: 0 }, { app: 7 }] } }
+    }]
+  });
+  const arrangement = config.workspaces[0].arrangement;
+  assert.equal(arrangement.mode, 'tiled');
+  assert.equal(arrangement.root.ratio, 0.95);
+  assert.equal(arrangement.root.kids[1].app, -1);
+  assert.deepEqual(plain(S.normalize(config).workspaces[0].arrangement), plain(arrangement));
+});
+
+test('mode "none" and a garbage mode both drop the key entirely', () => {
+  for (const mode of ['none', 'sideways', '', null]) {
+    const config = S.normalize({
+      workspaces: [{ id: 1, apps: [{ match: { class: 'a' } }], arrangement: { mode: mode, root: { app: 0 } } }]
+    });
+    assert.equal(config.workspaces[0].arrangement, undefined, String(mode));
+    assert.equal(JSON.stringify(config).indexOf('arrangement'), -1, String(mode));
+  }
+});
+
+test('an arrangement with no usable tree is dropped', () => {
+  const config = S.normalize({
+    workspaces: [{ id: 1, apps: [], arrangement: { mode: 'tiled', root: 'not a tree' } }]
+  });
+  assert.equal(config.workspaces[0].arrangement, undefined);
+});
+
+test('topReservePct is clamped to something a monitor could have', () => {
+  const make = value => S.normalize({
+    workspaces: [{ id: 1, apps: [{ match: { class: 'a' } }], arrangement: { mode: 'float', root: { app: 0 }, topReservePct: value } }]
+  }).workspaces[0].arrangement.topReservePct;
+  assert.equal(make(2.34), 2.34);
+  assert.equal(make(-5), 0);
+  assert.equal(make(900), 50);
+  assert.equal(make('nonsense'), 0);
+});
+
+test('normalize stays idempotent with desktop and arrangement present', () => {
+  const once = S.normalize({
+    workspaces: [{
+      id: 1,
+      apps: [{ label: 'a', match: { class: 'a' }, desktop: { id: 'a.desktop', classSource: 'exec' } }],
+      arrangement: { mode: 'float', root: { dir: 'v', ratio: 0.4, kids: [{ app: 0 }, { app: -1 }] }, topReservePct: 3 }
+    }]
+  });
+  assert.deepEqual(plain(S.normalize(once)), plain(once));
+  assert.deepEqual(plain(S.parse(S.serialize(once))), plain(once));
+});
+
+test('an explicit layout next to a tiled arrangement warns rather than silently losing', () => {
+  const config = S.normalize({
+    workspaces: [{
+      id: 1, layout: 'dwindle',
+      apps: [{ match: { class: 'a' } }, { match: { class: 'b' } }],
+      arrangement: { mode: 'tiled', root: { dir: 'h', ratio: 0.5, kids: [{ app: 0 }, { app: 1 }] } }
+    }]
+  });
+  const warnings = S.validate(config).warnings.map(w => w.message).join(' ');
+  assert.match(warnings, /explicit layout/);
+});
+
+test('float mode warns that the windows will not tile', () => {
+  const config = S.normalize({
+    workspaces: [{ id: 1, apps: [{ match: { class: 'a' } }], arrangement: { mode: 'float', root: { app: 0 } } }]
+  });
+  assert.match(S.validate(config).warnings.map(w => w.message).join(' '), /float instead of tiling/);
+});
+
+// A host that forgets to hand Config the layout module must never destroy the
+// user's drawing; preserving an unvalidated tree is the safe direction to fail.
+test('an un-injected Config preserves the arrangement rather than dropping it', () => {
+  const bare = loadSandbox({ layout: false });
+  const config = bare.normalize({
+    workspaces: [{ id: 1, apps: [{ match: { class: 'a' } }], arrangement: { mode: 'tiled', root: { dir: 'h', ratio: 0.5, kids: [{ app: 0 }, { app: -1 }] } } }]
+  });
+  assert.equal(config.workspaces[0].arrangement.mode, 'tiled');
+  assert.equal(config.workspaces[0].arrangement.root.kids.length, 2);
+});
